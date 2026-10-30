@@ -53,6 +53,10 @@ Cart (client, localStorage) ──> https://shop.maccabi-tlv.co.il/cart/<variant
 
 Environment variables are documented in `.env.example`; none are required.
 
+## Deploying
+
+Vercel builds the `main` branch for production (`wip/shop-v1` is the working branch and is pushed to `main` when it should go live). Previews stay out of search engines unless `NEXT_PUBLIC_ALLOW_INDEX=1` is set, and `metadataBase`/canonicals follow `VERCEL_PROJECT_PRODUCTION_URL`, or `NEXT_PUBLIC_SITE_URL` when it is set.
+
 ## SEO and sharing
 
 - `app/sitemap.ts`: home, departments and every product (with `lastModified`, main image).
