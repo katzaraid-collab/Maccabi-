@@ -43,7 +43,9 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
     const sec = root.current;
     const st = stage.current;
     if (!sec || !st) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Reduced motion still tells the three-chapter story, but gently: no lamp
+    // strobe, no camera push, no orbit or deep fly-in; chapters dissolve.
+    const gentle = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let target = 0;
     let p = -1;
@@ -59,6 +61,8 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
       const r = sec.getBoundingClientRect();
       const span = sec.offsetHeight - window.innerHeight;
       target = span > 0 ? clamp(-r.top / span) : 0;
+      // The skip link belongs to the first screen; once the film runs it steps aside.
+      sec.toggleAttribute("data-started", target > 0.02);
     };
 
     const render = (p: number, intro: number) => {
@@ -67,10 +71,11 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
       /* Chapter 1: tunnel, floodlights, headline */
       const tun = seg(p, 0, 0.14);
       set("--tun", inCubic(tun));
-      set("--cam", inOutCubic(seg(p, 0, 0.3)));
+      set("--cam", gentle ? 0 : inOutCubic(seg(p, 0, 0.3)));
       let lit = 0;
+      const light = gentle ? (t: number) => outCubic(clamp(t)) : strike;
       LAMP_AT.forEach((at, i) => {
-        const v = i === 0 ? Math.max(strike(intro), strike(seg(p, 0, 0.04) * 3)) : strike(seg(p, at, at + 0.04));
+        const v = i === 0 ? Math.max(light(intro), light(seg(p, 0, 0.04) * 3)) : light(seg(p, at, at + 0.04));
         set(`--L${i}`, v);
         lit += v / LAMP_AT.length;
       });
@@ -90,7 +95,7 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
       const spread = portrait ? sw * 0.42 : Math.min(sw * 0.82, W * 0.19);
       const R = portrait ? sw * 0.62 : sw * 0.95;
       const fan = inOutCubic(seg(p, 0.43, 0.48));
-      const orbit = inOutCubic(seg(p, 0.45, 0.6)) * 360;
+      const orbit = gentle ? 0 : inOutCubic(seg(p, 0.45, 0.6)) * 360;
       const settle = inOutCubic(seg(p, 0.58, 0.68));
       const finalX = portrait ? 0 : -W * 0.2;
       const finalY = portrait ? -H * 0.12 : H * 0.05;
@@ -106,12 +111,14 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
         let z = -Math.abs(off) * 80;
         let ry = -off * 16;
         let rz = -off * 5;
-        // fly in from deep behind the stage
-        x = mix(off * spread * 2.6, x, fly);
-        y = mix(-H * 0.5, y, fly);
-        z = mix(-2600, z, fly);
-        ry = mix(off * 70, ry, fly);
-        rz = mix(-off * 40, rz, fly);
+        // fly in from deep behind the stage (gentle: fade in place)
+        if (!gentle) {
+          x = mix(off * spread * 2.6, x, fly);
+          y = mix(-H * 0.5, y, fly);
+          z = mix(-2600, z, fly);
+          ry = mix(off * 70, ry, fly);
+          rz = mix(-off * 40, rz, fly);
+        }
         let o = clamp(fly * 2.5);
         // orbit: a ring that turns once, home ends in front
         const th = ((i * 90 + orbit) * Math.PI) / 180;
@@ -196,6 +203,7 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
     };
 
     st.dataset.live = "true";
+    sec.dataset.live = "true";
     wake();
     window.addEventListener("scroll", wake, { passive: true });
     window.addEventListener("resize", onResize);
@@ -209,7 +217,7 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
   // Keyboard users tabbing into the CTAs get the final frame, where they are visible.
   const showEnd = () => {
     const sec = root.current;
-    if (!sec || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!sec) return;
     const span = sec.offsetHeight - window.innerHeight;
     const r = sec.getBoundingClientRect();
     const at = clamp(-r.top / span);

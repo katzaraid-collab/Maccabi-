@@ -23,7 +23,7 @@ const displayHe = localFont({
   // Hebrew glyphs only: digits and Latin in headlines fall through to Anton.
   declarations: [
     { prop: "size-adjust", value: "128%" },
-    { prop: "unicode-range", value: "U+0590-05FF, U+FB1D-FB4F, U+0020-002F, U+003A-0040" },
+    { prop: "unicode-range", value: "U+0590-05FF, U+FB1D-FB4F, U+0020-002E, U+003A-0040" },
   ],
 });
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["500"], variable: "--font-mono-face", display: "swap" });

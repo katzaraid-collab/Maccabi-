@@ -631,7 +631,7 @@
 /* Visible on the first screen: on a phone the shop is otherwise ~4 screens away. */
 .skip {
   position: absolute;
-  z-index: 60;
+  z-index: 40; /* under the fixed header, so it never sits on top of it */
   top: calc(100svh - 64px);
   inset-inline-start: var(--gutter);
   padding: 10px 0;
@@ -641,6 +641,13 @@
   text-decoration: underline;
   text-underline-offset: 5px;
   text-decoration-thickness: 1px;
+}
+.skip {
+  transition: opacity 0.3s;
+}
+.film[data-started] .skip:not(:focus-visible) {
+  opacity: 0;
+  pointer-events: none;
 }
 .skip:focus-visible {
   outline-color: var(--yellow);
@@ -744,11 +751,13 @@
 }
 
 /* ---------- reduced motion: one composed poster, no pinning ---------- */
+/* Reduced motion with JS runs the gentle film (see ScrollFilm.tsx); this static
+   poster is only the fallback when the script hasn't taken over. */
 @media (prefers-reduced-motion: reduce) {
-  .film {
+  .film:not([data-live]) {
     height: auto;
   }
-  .stage {
+  .film:not([data-live]) .stage {
     --tun: 1;
     --cam: 1;
     --L0: 1;
@@ -776,35 +785,35 @@
     height: 100svh;
     min-height: 640px;
   }
-  .ctas {
+  .film:not([data-live]) .ctas {
     pointer-events: auto;
   }
   /* Keep a dark bar under the transparent header (white type). */
-  .screen {
+  .film:not([data-live]) .screen {
     clip-path: inset(var(--hh) 0 0 0);
   }
-  .c1,
-  .c2,
-  .c3,
-  .c2back {
+  .film:not([data-live]) .c1,
+  .film:not([data-live]) .c2,
+  .film:not([data-live]) .c3,
+  .film:not([data-live]) .c2back {
     bottom: 0;
   }
-  .grain {
+  .film:not([data-live]) .grain {
     animation: none;
   }
-  .tunnel,
-  .slate,
-  .sideA,
-  .sideB {
+  .film:not([data-live]) .tunnel,
+  .film:not([data-live]) .slate,
+  .film:not([data-live]) .sideA,
+  .film:not([data-live]) .sideB {
     display: none;
   }
-  .shirt[data-kit="home"] {
+  .film:not([data-live]) .shirt[data-kit="home"] {
     opacity: 1;
     transform: translate3d(-20vw, 5svh, 0) scale(1.5);
   }
 }
 @media (prefers-reduced-motion: reduce) and (max-aspect-ratio: 20/21) {
-  .shirt[data-kit="home"] {
+  .film:not([data-live]) .shirt[data-kit="home"] {
     transform: translate3d(0, -12svh, 0) scale(1.2);
   }
 }
