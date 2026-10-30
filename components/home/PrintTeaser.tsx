@@ -40,7 +40,7 @@ export function PrintTeaser({ links }: { links: Partial<Record<Kit, string>> }) 
               <span className={s.titleAccent}>הגב שלנו.</span>
             </span>
           </h2>
-          <p className={s.lead}>מקלידים שם ומספר, בוחרים חולצה, ורואים בדיוק מה יעלה על הגב.</p>
+          <p className={s.lead}>מקלידים שם ומספר, בוחרים חולצה, ורואים איך זה נראה על הגב. תצוגה מקדימה, קונספט.</p>
 
           <div className={s.form}>
             <label className={s.field}>

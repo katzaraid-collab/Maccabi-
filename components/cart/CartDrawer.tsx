@@ -113,6 +113,12 @@ export function CartDrawer() {
   };
 
   const hasPrint = lines.some((l) => l.print);
+  // Printing can't reach the current Shopify checkout yet, so the fan confirms
+  // they're buying without it instead of finding out after paying.
+  const [confirmPrint, setConfirmPrint] = useState(false);
+  useEffect(() => {
+    if (!open) setConfirmPrint(false);
+  }, [open]);
   const empty = lines.length === 0;
 
   return (
@@ -266,14 +272,32 @@ export function CartDrawer() {
                     <dd>{price(subtotal)}</dd>
                   </div>
                 </dl>
-                {hasPrint && (
+                {hasPrint && !confirmPrint && (
                   <p className={s.note}>
-                    <span className="tag-he">קונספט</span> הדפסה אישית עוד לא עוברת לקופה הקיימת. היא תתחבר דרך Storefront API.
+                    <span className="tag-he">קונספט</span> השם והמספר עוד לא עוברים לקופה של החנות.
                   </p>
                 )}
-                <a className="btn btn-navy btn-block" href={checkoutUrl(lines)}>
-                  לקופה <span className="arrow">←</span>
-                </a>
+                {hasPrint && confirmPrint ? (
+                  <div className={s.confirm} role="alertdialog" aria-labelledby="print-confirm">
+                    <p id="print-confirm">
+                      <strong>ההדפסה לא תגיע להזמנה.</strong> בקופה הנוכחית אפשר לקנות את החולצה בלי השם והמספר.
+                    </p>
+                    <a className="btn btn-navy btn-block" href={checkoutUrl(lines)}>
+                      להמשיך בלי הדפסה <span className="arrow">←</span>
+                    </a>
+                    <button className={s.continue} onClick={() => setConfirmPrint(false)}>
+                      חזרה לסל
+                    </button>
+                  </div>
+                ) : hasPrint ? (
+                  <button type="button" className="btn btn-navy btn-block" onClick={() => setConfirmPrint(true)}>
+                    לקופה <span className="arrow">←</span>
+                  </button>
+                ) : (
+                  <a className="btn btn-navy btn-block" href={checkoutUrl(lines)}>
+                    לקופה <span className="arrow">←</span>
+                  </a>
+                )}
                 <button className={s.continue} onClick={close}>
                   להמשיך לקנות
                 </button>

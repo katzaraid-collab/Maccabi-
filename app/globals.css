@@ -23,7 +23,7 @@
   /* Never red: it is the rival's colour. Sale and errors use the club blue. */
   --sale: #0145b2;
   --ok: #0b7a3e;
-  --error: #c4141d;
+  --error: #0145b2; /* errors read as blue + text, never rival red */
   --focus: var(--sky);
 
   /* Shape — hard edges. Round only where it is functional (swatches, badges). */
@@ -92,6 +92,7 @@
 }
 
 html {
+  scroll-padding-top: calc(var(--header-h) + 16px);
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   /* Nothing may widen the page sideways: in RTL overflow grows to the left and

@@ -85,6 +85,10 @@
   object-fit: cover;
   filter: saturate(0.92) contrast(1.08);
 }
+/* Frame the player from the chest up, so the tunnel opens on a face, not shorts. */
+.plate1 .plateImg {
+  object-position: 58% 12%;
+}
 .plate1,
 .video {
   transform: scale(calc(1.02 + var(--cam) * 0.16));
@@ -237,7 +241,10 @@
   display: block;
   /* --k runs 0 → 1 (in) → 2 (out): enters from below, leaves upward. */
   transform: translate3d(0, calc((1 - var(--k)) * 112%), 0);
-  will-change: transform;
+  /* Fade on the way out too: the text-shadow outruns the mask and left light
+     bands across the next chapter. */
+  opacity: clamp(0, calc(2 - var(--k)), 1);
+  will-change: transform, opacity;
 }
 
 .c1,
@@ -621,22 +628,29 @@
 }
 
 /* ---------- skip link ---------- */
+/* Visible on the first screen: on a phone the shop is otherwise ~4 screens away. */
 .skip {
   position: absolute;
   z-index: 60;
-  top: calc(var(--header-h, 72px) + 12px);
-  inset-inline-start: 16px;
-  padding: 12px 18px;
-  background: var(--yellow);
-  color: var(--navy);
-  font-weight: 800;
-  border-radius: 2px;
-  transform: translateY(-300%);
-  opacity: 0;
+  top: calc(100svh - 64px);
+  inset-inline-start: var(--gutter);
+  padding: 10px 0;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 1px;
 }
-.skip:focus {
-  transform: none;
-  opacity: 1;
+.skip:focus-visible {
+  outline-color: var(--yellow);
+}
+
+/* Phones: a shorter track, so the shop starts sooner. */
+@media (max-width: 700px) {
+  .film {
+    height: 300vh;
+  }
 }
 
 /* ---------- portrait composition (phones) ---------- */

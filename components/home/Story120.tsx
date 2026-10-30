@@ -27,8 +27,8 @@ export function Story120({ products }: { products: Product[] }) {
               <span className={s.accent}>אותו צהוב.</span>
             </span>
           </h2>
-          <p className={s.lead}>קולקציית היובל: משבצות, זהב והסמל של המאה ועשרים. לובשים היסטוריה, לא מסתכלים עליה.</p>
-          <Link href="/shop/fashion" className="btn">
+          <p className={s.lead}>קולקציית היובל: משבצות, זהב והסמל של המאה ועשרים. מאה ועשרים שנה, על החזה.</p>
+          <Link href="/search?q=120" className="btn">
             לקולקציית 120 <span className="arrow">←</span>
           </Link>
         </div>

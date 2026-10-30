@@ -219,7 +219,7 @@ export function ScrollFilm({ kits, video }: { kits: FilmKit[]; video?: string })
   return (
     <section ref={root} className={s.film} aria-labelledby="film-title">
       <a href="#drop" className={s.skip}>
-        דלג על הסרט
+        דלגו לחנות ↓
       </a>
       <h1 id="film-title" className="sr-only">
         מכבי תל אביב · תלבושות המשחק של עונת 26/27

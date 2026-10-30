@@ -92,7 +92,7 @@
   border-color: var(--yellow);
 }
 .field[data-invalid] {
-  border-color: #ff6b70;
+  border-color: var(--yellow);
   animation: shake 0.4s var(--ease-out);
 }
 @keyframes shake {
@@ -137,7 +137,7 @@
   min-height: 1.4em;
   font-size: 14px;
   font-weight: 700;
-  color: #ff8a8e;
+  color: var(--yellow);
 }
 
 .done {

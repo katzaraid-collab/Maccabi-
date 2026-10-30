@@ -178,7 +178,8 @@
   width: 6px;
   height: 6px;
   margin-inline-end: 6px;
-  background: #ff3b3b;
+  background: var(--yellow);
+  box-shadow: 0 0 0 1px var(--navy);
   border-radius: 50%;
   vertical-align: 1px;
   animation: blink 1.4s steps(2) infinite;

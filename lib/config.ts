@@ -7,7 +7,11 @@ export const DEPARTMENT_SLUGS = ["new", "kits", "training", "fashion", "kids", "
 export const CLUB_SITE = "https://www.maccabi-tlv.co.il";
 
 export function checkoutUrl(lines: { variantId: number; qty: number }[]) {
-  return `https://${STORE_DOMAIN}/cart/${lines.map((l) => `${l.variantId}:${l.qty}`).join(",")}`;
+  // The same variant can sit on two lines (with and without a print); the cart
+  // permalink wants one entry per variant, so quantities are merged.
+  const qty = new Map<number, number>();
+  for (const l of lines) qty.set(l.variantId, (qty.get(l.variantId) ?? 0) + l.qty);
+  return `https://${STORE_DOMAIN}/cart/${[...qty].map(([id, n]) => `${id}:${n}`).join(",")}`;
 }
 
 const ils = new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 2, minimumFractionDigits: 0 });

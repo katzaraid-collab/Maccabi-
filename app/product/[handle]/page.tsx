@@ -10,7 +10,7 @@ import { KitStory } from "@/components/product/KitStory";
 import { ProductView } from "@/components/product/ProductView";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { kitBundle } from "@/lib/bundles";
-import { getProduct, related } from "@/lib/catalog";
+import { getDepartment, getProduct, related } from "@/lib/catalog";
 import { STORE_DOMAIN } from "@/lib/config";
 import s from "./page.module.css";
 
@@ -57,13 +57,18 @@ export default async function ProductPage({ params }: Props) {
     })),
   };
 
+  // The product's own department for the breadcrumb: the most specific match wins.
+  const home =
+    ["kits", "training", "kids", "fashion", "accessories", "new", "sale"].map((slug) => getDepartment(slug)!).find((d) => d.match(product)) ??
+    getDepartment("new")!;
+
   return (
     <>
       <div className={s.page}>
         <nav className={s.crumbs} aria-label="פירורי לחם">
           <Link href="/">בית</Link>
           <span aria-hidden="true">/</span>
-          <Link href={product.kit ? "/shop/kits" : "/shop/new"}>{product.kit ? "תלבושות משחק" : "החנות"}</Link>
+          <Link href={`/shop/${home.slug}`}>{home.title}</Link>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{product.title}</span>
         </nav>
@@ -73,7 +78,7 @@ export default async function ProductPage({ params }: Props) {
       </div>
       {product.kit && <KitStory kit={product.kit} />}
       {product.kit && bundle.length > 0 && <Bundle items={bundle} kit={product.kit} current={product.handle} />}
-      {rail.length > 0 && <Rail eyebrow="N°03 · MORE" title="עוד מהמדף" href={product.kit ? "/shop/kits" : "/shop/new"} products={rail} />}
+      {rail.length > 0 && <Rail eyebrow="N°03 · MORE" title="עוד מהמדף" href={`/shop/${home.slug}`} products={rail} />}
       <RecentlyViewed current={{ handle: product.handle, title: product.title, price: product.price, image: product.images[0]?.src ?? null }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </>
