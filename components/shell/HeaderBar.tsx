@@ -225,6 +225,7 @@ export function HeaderBar({ depts }: { depts: MenuDept[] }) {
 
       <div id="mobile-menu" ref={menuRef} className={s.menu} data-open={menu} inert={!menu} role="dialog" aria-modal="true" aria-label="תפריט">
         <nav aria-label="תפריט נייד" className={s.mNav}>
+          <p className={s.mLabel}>החנות</p>
           <ul>
             {depts.map((d, i) => {
               const open = acc === d.slug;
@@ -232,15 +233,8 @@ export function HeaderBar({ depts }: { depts: MenuDept[] }) {
                 <li key={d.slug} className={s.mItem} style={{ "--i": i } as React.CSSProperties} data-open={open}>
                   <div className={s.mRow}>
                     <Link href={d.href} className={s.mLink} data-hot={d.hot}>
-                      <span className={s.mThumb}>
-                        {d.photo && <Image src={d.photo.src} alt="" fill sizes="72px" style={{ objectPosition: d.photo.pos }} />}
-                      </span>
-                      <span className={s.mText}>
-                        <span className={`latin ${s.mNo}`}>
-                          {String(i + 1).padStart(2, "0")} · {d.latin}
-                        </span>
-                        <span className={s.mTitle}>{d.label === "SALE" ? <span className="latin">SALE</span> : d.title}</span>
-                      </span>
+                      <span className={s.mTitle}>{d.title}</span>
+                      <span className={s.mCount}>{d.count}</span>
                     </Link>
                     {d.cols.length > 0 && (
                       <button
@@ -251,7 +245,9 @@ export function HeaderBar({ depts }: { depts: MenuDept[] }) {
                         aria-label={`קטגוריות ב${d.title}`}
                         onClick={() => setAcc(open ? null : d.slug)}
                       >
-                        <span aria-hidden="true" />
+                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                          <path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
                       </button>
                     )}
                   </div>
@@ -272,7 +268,7 @@ export function HeaderBar({ depts }: { depts: MenuDept[] }) {
                         </div>
                       ))}
                       <Link href={d.href} className={s.mAll}>
-                        לכל {d.count} הפריטים ←
+                        לכל {d.count} הפריטים
                       </Link>
                     </div>
                   </div>
@@ -281,14 +277,30 @@ export function HeaderBar({ depts }: { depts: MenuDept[] }) {
             })}
           </ul>
         </nav>
+        {depts[0]?.photo && (
+          <Link href={depts[0].href} className={s.mFeature}>
+            <span className={s.mFeatureImg}>
+              <Image src={depts[0].photo.src} alt="" fill sizes="(max-width: 600px) 100vw, 480px" style={{ objectPosition: depts[0].photo.pos }} />
+            </span>
+            <span className={s.mFeatureText}>
+              <span className="tag">NEW SEASON · 26/27</span>
+              <span>הקולקציה החדשה כבר כאן</span>
+            </span>
+          </Link>
+        )}
         <div className={s.mFoot}>
           <button
             type="button"
+            className={s.mSearch}
             onClick={() => {
               setMenu(false);
               setSearch(true);
             }}
           >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M20 20l-4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
             חיפוש מוצרים
           </button>
           <a href={CLUB_SITE}>לאתר המועדון ↗</a>
