@@ -1,0 +1,44 @@
+import type { Metadata, Viewport } from "next";
+import { Anton, Heebo } from "next/font/google";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { CartProvider } from "@/components/cart/CartProvider";
+import { Footer } from "@/components/shell/Footer";
+import { Header } from "@/components/shell/Header";
+import { RevealObserver } from "@/components/shell/RevealObserver";
+import "./globals.css";
+
+const body = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-body", display: "swap" });
+const display = Anton({ subsets: ["latin"], weight: "400", variable: "--font-latin-display", display: "swap" });
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://shop.maccabi-tlv.co.il"),
+  title: { default: "מכבי תל אביב – החנות הרשמית", template: "%s · מכבי תל אביב" },
+  description: "תלבושות המשחק של עונת 26/27, הדפסת שם ומספר, קולקציית 120 שנה, אופנה, ילדים ואביזרים – החנות הרשמית של מועדון הכדורגל מכבי תל אביב.",
+  openGraph: { type: "website", locale: "he_IL", siteName: "מכבי תל אביב – החנות הרשמית", images: ["/crest.png"] },
+  icons: { icon: "/crest.png", apple: "/crest.png" },
+};
+
+export const viewport: Viewport = { themeColor: "#000e62" };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="he" dir="rtl" className={`${body.variable} ${display.variable}`}>
+      <head>
+        {/* Mark JS as available before first paint so reveal animations never hide content without it. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
+      <body>
+        <a href="#main" className="skip">
+          דלג לתוכן
+        </a>
+        <CartProvider>
+          <Header />
+          <main id="main">{children}</main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
+        <RevealObserver />
+      </body>
+    </html>
+  );
+}

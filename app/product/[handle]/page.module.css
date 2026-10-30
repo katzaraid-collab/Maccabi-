@@ -1,0 +1,20 @@
+.page {
+  padding-top: calc(var(--header-h) + 20px);
+  padding-bottom: 40px;
+}
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.crumbs a:hover {
+  color: var(--navy);
+  text-decoration: underline;
+}
+.crumbs [aria-current] {
+  color: var(--navy);
+  font-weight: 600;
+}

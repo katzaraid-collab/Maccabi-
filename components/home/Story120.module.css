@@ -1,0 +1,78 @@
+.section {
+  position: relative;
+  background: var(--navy);
+  color: var(--white);
+  overflow: hidden;
+  padding-block: clamp(80px, 11vw, 160px);
+}
+.bg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.bg span {
+  font-size: 48vw;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(249, 215, 22, 0.14);
+}
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 48px;
+  align-items: center;
+}
+.eyebrow {
+  color: var(--yellow);
+}
+.copy h2 {
+  font-size: clamp(56px, 8vw, 124px);
+  margin: 16px 0 24px;
+  color: var(--yellow);
+}
+.copy p {
+  max-width: 40ch;
+  font-size: 18px;
+  opacity: 0.85;
+  margin: 0 0 32px;
+}
+.stack {
+  position: relative;
+  height: clamp(360px, 40vw, 560px);
+}
+.card {
+  position: absolute;
+  width: 56%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow-lg);
+  top: calc(var(--i) * 12%);
+  inset-inline-start: calc(var(--i) * 22%);
+  rotate: calc((var(--i) - 1) * 6deg);
+  transition:
+    rotate 0.6s var(--ease-out),
+    scale 0.6s var(--ease-out),
+    z-index 0s;
+}
+.card img {
+  object-fit: contain;
+  padding: 8%;
+}
+.card:hover {
+  rotate: 0deg;
+  scale: 1.05;
+  z-index: 3;
+}
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .stack {
+    height: 420px;
+  }
+}

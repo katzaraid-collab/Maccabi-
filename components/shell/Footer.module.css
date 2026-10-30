@@ -1,0 +1,117 @@
+.footer {
+  position: relative;
+  background: var(--ink);
+  color: var(--white);
+  padding-top: clamp(56px, 8vw, 110px);
+  overflow: hidden;
+}
+.top {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 48px;
+  align-items: end;
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--line-dark);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.since {
+  font-size: clamp(40px, 5vw, 64px);
+  color: var(--yellow);
+}
+.news h2 {
+  font-size: clamp(32px, 4vw, 52px);
+}
+.news p {
+  margin: 12px 0 20px;
+  opacity: 0.75;
+}
+.field {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--line-dark);
+}
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--white);
+  padding: 0 18px;
+  font-size: 16px;
+  text-align: right;
+}
+.field input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+.field input:focus {
+  outline: none;
+}
+.thanks {
+  font-weight: 800;
+  color: var(--yellow);
+  opacity: 1 !important;
+}
+.cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  padding-block: 48px;
+}
+.cols nav {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.cols h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--yellow);
+}
+.cols a {
+  opacity: 0.78;
+  transition: opacity 0.2s;
+  width: fit-content;
+}
+.cols a:hover {
+  opacity: 1;
+}
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-block: 20px;
+  font-size: 13px;
+  opacity: 0.6;
+  border-top: 1px solid var(--line-dark);
+  position: relative;
+  z-index: 1;
+}
+.giant {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  font-size: 22vw;
+  line-height: 0.75;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.09);
+  user-select: none;
+  margin-bottom: -2vw;
+  direction: ltr;
+}
+@media (max-width: 860px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+  .cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

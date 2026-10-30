@@ -1,0 +1,69 @@
+.section {
+  padding-block: clamp(56px, 7vw, 100px);
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.head h2 {
+  font-size: clamp(40px, 5vw, 72px);
+  margin-top: 14px;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.controls button {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--navy);
+  background: transparent;
+  font-size: 20px;
+  font-weight: 900;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.controls button:hover {
+  background: var(--navy);
+  color: var(--white);
+}
+.all {
+  font-weight: 800;
+  margin-inline-end: 12px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--yellow);
+}
+.track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(220px, 23vw, 330px);
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-inline: var(--gutter);
+  scroll-padding-inline: var(--gutter);
+  padding-bottom: 12px;
+  scrollbar-width: none;
+}
+.track::-webkit-scrollbar {
+  display: none;
+}
+.cell {
+  scroll-snap-align: start;
+}
+@media (max-width: 700px) {
+  .controls button {
+    display: none;
+  }
+  .track {
+    grid-auto-columns: 62vw;
+  }
+}

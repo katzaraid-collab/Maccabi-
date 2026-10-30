@@ -1,0 +1,103 @@
+.card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+.media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--white);
+  isolation: isolate;
+}
+.img,
+.alt {
+  object-fit: contain;
+  padding: 8%;
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.8s var(--ease-out);
+}
+.alt {
+  opacity: 0;
+}
+.card:hover .img {
+  transform: scale(1.06);
+}
+.card:hover .alt {
+  opacity: 1;
+}
+.card:hover .alt + .img,
+.card:hover .img:has(+ .alt) {
+  opacity: 0;
+}
+.card[data-soldout="true"] .img {
+  filter: grayscale(0.7);
+  opacity: 0.6;
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-latin-display), sans-serif;
+  font-size: 48px;
+  color: var(--line);
+}
+.flags {
+  position: absolute;
+  top: 12px;
+  inset-inline-start: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  z-index: 1;
+}
+.flag {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: var(--navy);
+  color: var(--white);
+}
+.sale {
+  background: var(--sale);
+}
+.new {
+  background: var(--yellow);
+  color: var(--navy);
+}
+.print {
+  background: var(--white);
+  color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.body {
+  display: grid;
+  gap: 4px;
+  padding-inline: 4px;
+}
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.price {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.price strong {
+  font-size: 17px;
+}
+.price s {
+  color: var(--muted);
+  font-size: 14px;
+}

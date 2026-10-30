@@ -1,0 +1,33 @@
+.forever {
+  padding-block: 0 clamp(72px, 9vw, 130px);
+}
+.foreverCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: calc(var(--radius) * 2);
+  background: var(--yellow);
+  padding: clamp(32px, 6vw, 88px);
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.foreverCard::after {
+  content: "";
+  position: absolute;
+  width: 60%;
+  aspect-ratio: 1;
+  inset-inline-end: -14%;
+  top: -40%;
+  border-radius: 50%;
+  border: 60px solid rgba(0, 14, 98, 0.08);
+}
+.foreverCard h2 {
+  font-size: clamp(64px, 12vw, 180px);
+  line-height: 0.85;
+  direction: ltr;
+}
+.foreverCard p {
+  max-width: 44ch;
+  font-size: 18px;
+  margin: 0 0 16px;
+}
