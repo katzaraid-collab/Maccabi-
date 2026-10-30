@@ -30,3 +30,5 @@ Before anything goes public, the club must confirm usage rights, including photo
 | match-home-1.webp | 1920x1080 | https://static.maccabi-tlv.co.il/wp-content/uploads/2026/10/MTA_202610290835088d44ee55e3146fb2fe76ed6ded33a1be.jpg |
 | match-home-2.webp | 1920x1080 | https://static.maccabi-tlv.co.il/wp-content/uploads/2026/10/MTA_2026102909043254530175ca9e3c5918c654103ebf1ab0.jpg |
 | lifestyle-editorial.webp | 1920x1080 | https://static.maccabi-tlv.co.il/wp-content/uploads/2026/09/MTA_202609080948014aee716c7bb04309a7c18c899b232b74.jpg |
+
+Some match photos are colour-graded: saturated reds (rival kits, red seats) are shifted to Maccabi blue with scripts/club-colors.py.

@@ -20,7 +20,8 @@
   --line: rgba(0, 14, 98, 0.12);
   --line-strong: rgba(0, 14, 98, 0.3);
   --line-dark: rgba(255, 255, 255, 0.14);
-  --sale: #e5262f;
+  /* Never red: it is the rival's colour. Sale and errors use the club blue. */
+  --sale: #0145b2;
   --ok: #0b7a3e;
   --error: #c4141d;
   --focus: var(--sky);
@@ -64,8 +65,8 @@
 
   /* Fonts. --font-display-he / --font-mono-face come from next/font in
      app/layout.tsx; the chains keep modules that use them off Times. */
-  --font-display: var(--font-display-he, var(--font-body)), var(--font-body), sans-serif;
-  --display-stretch: 72%;
+  --font-display: var(--font-display-he, var(--font-body)), var(--font-latin-display), var(--font-body), sans-serif;
+  --display-stretch: normal;
   --font-mono: var(--font-mono-face, ui-monospace), ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   /* Motion */
@@ -230,9 +231,9 @@ p {
 .display {
   font-family: var(--font-display);
   font-stretch: var(--display-stretch);
-  font-weight: 900;
+  font-weight: 700;
   line-height: var(--lh-tight);
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   margin: 0;
 }
 .eyebrow {

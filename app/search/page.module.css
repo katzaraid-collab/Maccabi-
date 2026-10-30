@@ -27,9 +27,10 @@
 .title {
   margin: 0;
   font-size: clamp(56px, 9vw, 160px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.88;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   overflow-wrap: anywhere;
   animation: rise 0.8s var(--ease-out) both;
 }
@@ -79,9 +80,10 @@
 .noneTitle {
   margin: 0 0 28px;
   font-size: clamp(36px, 5vw, 72px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.95;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 .noneTitle small {
   display: block;

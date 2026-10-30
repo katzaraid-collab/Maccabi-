@@ -253,10 +253,10 @@
 .h2,
 .h3 {
   margin: 0;
-  font-family: var(--font-body), sans-serif;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.86;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 
 .c1 {

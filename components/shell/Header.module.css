@@ -299,9 +299,10 @@
 .megaTitle {
   margin: 0;
   font-size: clamp(36px, 3.4vw, 54px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.9;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 .megaKicker {
   margin: 0;
@@ -516,9 +517,10 @@
 }
 .mTitle {
   font-size: clamp(28px, 8.4vw, 40px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.95;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 .mLink[data-hot="true"] .mTitle {
   color: var(--yellow);

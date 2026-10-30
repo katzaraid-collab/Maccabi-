@@ -275,9 +275,10 @@
 }
 .empty .emptyBig {
   font-size: clamp(48px, 7vw, 110px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 700;
   line-height: 0.9;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: var(--navy);
   margin-bottom: 8px;
 }

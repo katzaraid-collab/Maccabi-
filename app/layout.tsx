@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Heebo, JetBrains_Mono, Noto_Sans_Hebrew } from "next/font/google";
+import { Anton, Heebo, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { Footer } from "@/components/shell/Footer";
@@ -12,14 +13,18 @@ import "./globals.css";
 
 const body = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-body", display: "swap" });
 const display = Anton({ subsets: ["latin"], weight: "400", variable: "--font-latin-display", display: "swap" });
-// Hebrew display voice: Noto Sans Hebrew Black on its condensed width axis sits
-// next to Anton far better than a wide geometric black.
-const displayHe = Noto_Sans_Hebrew({
-  subsets: ["hebrew"],
-  weight: "variable",
-  axes: ["wdth"],
+// Hebrew display voice: Karantina, a condensed poster face that reads like a
+// stadium banner next to Anton. It sets small for its size, so it's scaled up.
+const displayHe = localFont({
+  src: "../assets/fonts/Karantina-Bold.ttf",
+  weight: "700",
   variable: "--font-display-he",
   display: "swap",
+  // Hebrew glyphs only: digits and Latin in headlines fall through to Anton.
+  declarations: [
+    { prop: "size-adjust", value: "128%" },
+    { prop: "unicode-range", value: "U+0590-05FF, U+FB1D-FB4F, U+0020-002F, U+003A-0040" },
+  ],
 });
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["500"], variable: "--font-mono-face", display: "swap" });
 
