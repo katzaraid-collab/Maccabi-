@@ -24,11 +24,39 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(-1);
 
+  const panel = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const t = setTimeout(() => input.current?.focus(), 60);
     return () => clearTimeout(t);
   }, [open]);
+
+  // A modal: Escape closes from anywhere inside, and Tab stays in the panel.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && document.activeElement !== input.current) {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !panel.current) return;
+      const items = [...panel.current.querySelectorAll<HTMLElement>("a[href],button,input,[tabindex]:not([tabindex='-1'])")].filter((x) => x.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !panel.current.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
   // Debounced fetch; stale responses are aborted.
   useEffect(() => {
@@ -108,7 +136,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
   return (
     <div className={s.root} data-open={open} inert={!open}>
       <div className={s.scrim} onClick={onClose} aria-hidden="true" />
-      <div className={s.panel} role="dialog" aria-modal="true" aria-label="חיפוש מוצרים">
+      <div className={s.panel} ref={panel} role="dialog" aria-modal="true" aria-label="חיפוש מוצרים">
         <div className={`wrap ${s.top}`}>
           <Image src="/crest.png" alt="" width={36} height={36} className={s.crest} />
           <form
@@ -193,8 +221,10 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                   <p>נסו מילה אחרת, או אחד מאלה:</p>
                   <ul className={s.chips}>
                     {SUGGESTED.slice(0, 6).map((c) => (
-                      <li key={c} onClick={() => setQ(c)}>
-                        {c}
+                      <li key={c}>
+                        <button type="button" onClick={() => setQ(c)}>
+                          {c}
+                        </button>
                       </li>
                     ))}
                   </ul>

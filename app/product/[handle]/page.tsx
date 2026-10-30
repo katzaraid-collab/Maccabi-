@@ -3,7 +3,6 @@ import { OG_SIZE } from "@/lib/og";
 import { canonical } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { Rail } from "@/components/home/Rail";
 import { Bundle } from "@/components/product/Bundle";
 import { KitStory } from "@/components/product/KitStory";
@@ -15,6 +14,11 @@ import { STORE_DOMAIN } from "@/lib/config";
 import s from "./page.module.css";
 
 export const revalidate = 900;
+// Generated on first request, then cached for 15 minutes (ISR) instead of
+// rendering on every request.
+export function generateStaticParams() {
+  return [];
+}
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -72,9 +76,7 @@ export default async function ProductPage({ params }: Props) {
           <span aria-hidden="true">/</span>
           <span aria-current="page">{product.title}</span>
         </nav>
-        <Suspense>
-          <ProductView product={product} />
-        </Suspense>
+        <ProductView product={product} />
       </div>
       {product.kit && <KitStory kit={product.kit} />}
       {product.kit && bundle.length > 0 && <Bundle items={bundle} kit={product.kit} current={product.handle} />}

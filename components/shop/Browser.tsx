@@ -72,6 +72,21 @@ export function Browser({ items }: { items: ShopItem[] }) {
       if (e.key === "Escape") {
         setSheet(false);
         toggleRef.current?.focus();
+        return;
+      }
+      // The sheet is a modal on phones: keep Tab inside it.
+      const el = sheetRef.current;
+      if (e.key !== "Tab" || !el) return;
+      const items = [...el.querySelectorAll<HTMLElement>("a[href],button,input,select")].filter((x) => x.offsetParent !== null && !x.hasAttribute("disabled"));
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !el.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
       }
     };
     window.addEventListener("keydown", onKey);

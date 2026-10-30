@@ -116,9 +116,13 @@ export function CartDrawer() {
   // Printing can't reach the current Shopify checkout yet, so the fan confirms
   // they're buying without it instead of finding out after paying.
   const [confirmPrint, setConfirmPrint] = useState(false);
+  const confirmLink = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     if (!open) setConfirmPrint(false);
   }, [open]);
+  useEffect(() => {
+    if (confirmPrint) confirmLink.current?.focus();
+  }, [confirmPrint]);
   const empty = lines.length === 0;
 
   return (
@@ -282,7 +286,7 @@ export function CartDrawer() {
                     <p id="print-confirm">
                       <strong>ההדפסה לא תגיע להזמנה.</strong> בקופה הנוכחית אפשר לקנות את החולצה בלי השם והמספר.
                     </p>
-                    <a className="btn btn-navy btn-block" href={checkoutUrl(lines)}>
+                    <a ref={confirmLink} className="btn btn-navy btn-block" href={checkoutUrl(lines)}>
                       להמשיך בלי הדפסה <span className="arrow">←</span>
                     </a>
                     <button className={s.continue} onClick={() => setConfirmPrint(false)}>

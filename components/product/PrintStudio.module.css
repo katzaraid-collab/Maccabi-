@@ -41,7 +41,7 @@
   transform: rotate(45deg) scale(1);
 }
 .head input:focus-visible + .box {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 .headText {

@@ -40,7 +40,9 @@ export function TransitionRouter() {
             const timer = window.setTimeout(resolve, 1200);
             settle.current = () => {
               window.clearTimeout(timer);
-              requestAnimationFrame(() => resolve());
+              // Not requestAnimationFrame: rAF doesn't fire while a view transition
+              // is pending, which froze the old page until Chrome timed out (~4 s).
+              resolve();
             };
             router.push(href);
           }),

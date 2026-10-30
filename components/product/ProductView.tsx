@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { price, STORE_DOMAIN } from "@/lib/config";
@@ -15,7 +14,6 @@ import s from "./ProductView.module.css";
 
 export function ProductView({ product }: { product: Product }) {
   const { add } = useCart();
-  const params = useSearchParams();
   const variants = useMemo(() => sortedVariants(product), [product]);
   const single = isSingle(product);
   const system = sizeSystem(product);
@@ -43,6 +41,7 @@ export function ProductView({ product }: { product: Product }) {
 
   // Arriving from the home print studio carries the name and number along.
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
     const n = params.get("name");
     const num = params.get("number");
     if (kit && (n || num || window.location.hash === "#print")) {
@@ -51,7 +50,7 @@ export function ProductView({ product }: { product: Product }) {
       if (n) setName(n.slice(0, NAME_MAX));
       if (num) setNumber(num.replace(/\D/g, "").slice(0, 2));
     }
-  }, [params, kit]);
+  }, [kit]);
 
   // The mobile buy bar only shows while the real add button is off screen.
   useEffect(() => {

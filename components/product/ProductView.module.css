@@ -98,7 +98,7 @@
   cursor: pointer;
 }
 .guideBtn:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 .sizeGrid {
@@ -141,7 +141,7 @@
   box-shadow: none;
 }
 .size input:focus-visible + span {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 /* Sold out: struck through, flat, not clickable. */
@@ -198,7 +198,7 @@
   cursor: default;
 }
 .qty button:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
 .qty output {
@@ -238,7 +238,7 @@
   transform: scaleX(1);
 }
 .add:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 .add:disabled {
@@ -335,7 +335,7 @@
   transform: rotate(45deg);
 }
 .details summary:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 .details p {
@@ -430,7 +430,7 @@
     color: var(--navy);
   }
   .barAdd:focus-visible {
-    outline: 3px solid var(--yellow);
+    outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
 }

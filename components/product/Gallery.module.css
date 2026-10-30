@@ -33,7 +33,7 @@
   overflow: hidden;
 }
 .zoomable:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
 .img {
@@ -130,7 +130,7 @@
   color: var(--white);
 }
 .toggle button:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 .index {

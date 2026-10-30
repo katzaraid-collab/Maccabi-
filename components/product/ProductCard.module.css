@@ -99,8 +99,9 @@
   text-underline-offset: 3px;
 }
 .title a:focus-visible {
-  outline: 3px solid var(--yellow);
-  outline-offset: 2px;
+  outline: 3px solid var(--focus);
+  /* Inside: the line clamp's overflow:hidden would cut an outside ring. */
+  outline-offset: -3px;
 }
 .price {
   display: flex;
@@ -181,7 +182,7 @@
 }
 .quickSizes button:focus-visible,
 .quickOne:focus-visible {
-  outline: 3px solid var(--yellow);
+  outline: 3px solid var(--focus);
   outline-offset: 1px;
 }
 .quickOne {
