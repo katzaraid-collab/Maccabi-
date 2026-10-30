@@ -1,9 +1,16 @@
 import "server-only";
-import snapshot from "@/data/catalog.snapshot.json";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { STORE_DOMAIN } from "./config";
 import type { Kit, Product } from "./types";
 
-type RawProduct = (typeof snapshot)[number];
+// Type-only reference: the 650 KB snapshot is imported lazily, only when the
+// live store can't be reached, so it stays out of the hot path.
+type RawProduct = (typeof import("@/data/catalog.snapshot.json"))[number];
+
+/** Cache tag for everything derived from the catalog. `revalidateTag(CATALOG_TAG)` refreshes it on demand. */
+export const CATALOG_TAG = "catalog";
+const REVALIDATE = 900;
 
 function stripHtml(html: string) {
   return html
@@ -47,7 +54,8 @@ function normalize(p: RawProduct): Product {
     description: stripHtml(p.body_html ?? ""),
     tags: p.tags,
     createdAt: p.created_at,
-    images: p.images,
+    // Only the fields the UI reads; the live feed carries much more per image.
+    images: p.images.map((i) => ({ src: i.src, width: i.width, height: i.height })),
     variants,
     price,
     compareAt,
@@ -56,17 +64,25 @@ function normalize(p: RawProduct): Product {
   };
 }
 
+async function fetchPage(page: number): Promise<RawProduct[]> {
+  const res = await fetch(`https://${STORE_DOMAIN}/products.json?limit=250&page=${page}`, {
+    // Each page is ~0.6–0.8 MB, under the 2 MB data-cache limit, so pages cache individually.
+    next: { revalidate: REVALIDATE, tags: [CATALOG_TAG] },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error(`products.json page ${page}: ${res.status}`);
+  return ((await res.json()) as { products: RawProduct[] }).products;
+}
+
 async function fetchLive(): Promise<RawProduct[] | null> {
   try {
+    // The store holds ~500 products (2 pages). Pages are fetched in pairs so
+    // the common case is one round trip instead of three sequential ones.
     const all: RawProduct[] = [];
-    for (let page = 1; page < 20; page++) {
-      const res = await fetch(`https://${STORE_DOMAIN}/products.json?limit=250&page=${page}`, {
-        next: { revalidate: 900 },
-      });
-      if (!res.ok) return null;
-      const { products } = (await res.json()) as { products: RawProduct[] };
-      if (!products.length) break;
-      all.push(...products);
+    for (let page = 1; page < 20; page += 2) {
+      const [a, b] = await Promise.all([fetchPage(page), fetchPage(page + 1)]);
+      all.push(...a, ...b);
+      if (a.length < 250 || b.length < 250) break;
     }
     return all.length ? all : null;
   } catch {
@@ -74,16 +90,52 @@ async function fetchLive(): Promise<RawProduct[] | null> {
   }
 }
 
-let cache: Promise<Product[]> | null = null;
+async function loadCatalog(): Promise<Product[]> {
+  const live = await fetchLive();
+  const raw = live ?? (await import("@/data/catalog.snapshot.json")).default;
+  return raw.map(normalize);
+}
+
+// Across requests: the normalized catalog (~0.5 MB) sits in the data cache for
+// 15 minutes, so a request doesn't re-parse and re-normalize the raw feed.
+const cachedCatalog = unstable_cache(loadCatalog, ["catalog:v2"], { revalidate: REVALIDATE, tags: [CATALOG_TAG] });
+
+// Within a request: page, generateMetadata, OG image etc. share one result.
+// (The old module-level promise never expired, so a long-running server kept
+// serving the catalog from its first request regardless of ISR.)
+const requestCatalog = cache(async (): Promise<Product[]> => {
+  try {
+    return await cachedCatalog();
+  } catch {
+    // unstable_cache needs a Next request/build scope; scripts fall back here.
+    return loadCatalog();
+  }
+});
+
+const handleIndex = new WeakMap<Product[], Map<string, Product>>();
 
 export function getCatalog(): Promise<Product[]> {
-  cache ??= fetchLive().then((live) => (live ?? snapshot).map(normalize));
-  return cache;
+  return requestCatalog();
 }
 
 export async function getProduct(handle: string) {
   const decoded = decodeURIComponent(handle);
-  return (await getCatalog()).find((p) => p.handle === decoded) ?? null;
+  const catalog = await getCatalog();
+  let index = handleIndex.get(catalog);
+  if (!index) {
+    index = new Map(catalog.map((p) => [p.handle, p]));
+    handleIndex.set(catalog, index);
+  }
+  return index.get(decoded) ?? null;
+}
+
+/**
+ * Trim a product to what a grid card reads before handing it to a client
+ * component: no description, no variants, two images. Still typed as Product,
+ * so `products={list.map(toCard)}` is a drop-in change for Rail and Browser.
+ */
+export function toCard(p: Product): Product {
+  return { ...p, description: "", variants: [], images: p.images.slice(0, 2) };
 }
 
 // Curated departments. The live store has 100+ overlapping collections; these

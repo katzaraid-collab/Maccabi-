@@ -1,0 +1,180 @@
+.studio {
+  border-top: 1px solid var(--navy);
+  border-bottom: 1px solid var(--line);
+}
+.head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  cursor: pointer;
+}
+.head input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.box {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1.5px var(--navy);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.box::after {
+  content: "";
+  position: absolute;
+  inset: 5px 7px 7px 7px;
+  border: solid var(--yellow);
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.25s var(--ease-out);
+}
+.head input:checked + .box {
+  background: var(--navy);
+}
+.head input:checked + .box::after {
+  transform: rotate(45deg) scale(1);
+}
+.head input:focus-visible + .box {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+.headText {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.headTitle {
+  font-weight: 900;
+  font-size: 17px;
+}
+.tag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+}
+.body {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 18px;
+  animation: open 0.4s var(--ease-out);
+}
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.preview {
+  display: none;
+}
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 104px;
+  gap: 10px;
+}
+.field {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  min-width: 0;
+}
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.counter {
+  font-family: var(--font-latin-display), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.counter[data-full="true"] {
+  color: var(--navy);
+}
+.field input {
+  width: 100%;
+  min-width: 0;
+  height: 54px;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  padding: 0 14px;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--navy);
+  background: var(--white);
+  transition: box-shadow 0.2s;
+}
+.field input::placeholder {
+  color: rgba(0, 14, 98, 0.3);
+  font-weight: 700;
+}
+.field input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--navy);
+}
+.field input[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 2px var(--sale);
+}
+.num input {
+  text-align: center;
+  font-family: var(--font-latin-display), sans-serif;
+  font-weight: 400;
+  font-size: 26px;
+}
+.msg {
+  min-height: 16px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.msg[data-error="true"] {
+  color: var(--sale);
+}
+.note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* On phones the gallery is far above the inputs, so the shirt comes down with them. */
+@media (max-width: 900px) {
+  .preview {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 5 / 4;
+    background:
+      radial-gradient(60% 55% at 50% 45%, rgba(255, 255, 255, 0.09), transparent 70%),
+      var(--navy);
+  }
+  .studio[data-kit="away"] .preview {
+    background: #e9e6dc;
+  }
+  .jersey {
+    width: 62%;
+    height: auto;
+    filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.35));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .body {
+    animation: none;
+  }
+}

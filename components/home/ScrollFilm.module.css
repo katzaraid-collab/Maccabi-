@@ -1,0 +1,803 @@
+/* Scroll film: a 420vh track with a sticky 100svh stage. All motion is driven by
+   custom properties written once per frame on .stage (see ScrollFilm.tsx). */
+
+.film {
+  position: relative;
+  height: 420vh;
+  background: var(--paper);
+}
+
+.stage {
+  /* Resting values, also what a no-JS visitor sees: chapter one, first light. */
+  --tun: 0;
+  --cam: 0;
+  --L0: 1;
+  --L1: 0;
+  --L2: 0;
+  --L3: 0;
+  --lit: 0.25;
+  --h1a: 1;
+  --h1b: 1;
+  --h1x: 0;
+  --g1: 0;
+  --dim: 0;
+  --h2a: 0;
+  --h2b: 0;
+  --tags: 0;
+  --wipe: 0;
+  --frame: 1;
+  --crest: 0;
+  --crestO: 0;
+  --ring: 0;
+  --h3a: 0;
+  --h3b: 0;
+  --big: 0;
+  --cta: 0;
+  --p: 0;
+
+  --hh: var(--header-h, 72px);
+  --side: clamp(0px, 1.5vw, 24px);
+  --foot: 52px;
+  --pad: clamp(16px, 4.4vw, 72px);
+  --sw: min(50svh, 620px);
+  --night: #01020c;
+
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  /* Letterbox bars are black, so the transparent header reads white on them. */
+  background: var(--night);
+  color: var(--paper);
+  isolation: isolate;
+}
+
+/* ---------- the film frame ---------- */
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--night);
+  clip-path: inset(
+    calc(var(--hh) * var(--frame)) calc(var(--side) * var(--frame)) calc(var(--foot) * var(--frame))
+      calc(var(--side) * var(--frame))
+  );
+}
+
+.video,
+.world {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.video {
+  object-fit: cover;
+}
+.plate1,
+.plate2 {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.plateImg {
+  object-fit: cover;
+  filter: saturate(0.92) contrast(1.08);
+}
+.plate1,
+.video {
+  transform: scale(calc(1.02 + var(--cam) * 0.16));
+  transform-origin: 60% 45%;
+}
+.sections {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.sections {
+  /* L3 is the last bank: it lifts the whole bowl. */
+  opacity: calc(1 - var(--L3) * 0.45);
+}
+.sections i {
+  background: var(--night);
+  opacity: calc(0.9 - var(--L) * 0.62);
+  box-shadow: inset -1px 0 0 rgba(244, 242, 234, calc(0.1 * var(--L)));
+}
+.plate1::after {
+  /* Grade: crush the top and bottom so the type and the frame hold. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(1, 2, 12, 0.55), transparent 32%, transparent 62%, rgba(1, 2, 12, 0.7));
+}
+.plate2 {
+  /* A hard wipe, right to left, rather than a cross-dissolve. */
+  clip-path: inset(0 0 0 calc((1 - var(--dim)) * 100%));
+  transform: scale(calc(1.14 - var(--p) * 0.14));
+  transform-origin: 50% 40%;
+}
+.plate2 .plateImg {
+  filter: grayscale(1) contrast(1.2) brightness(0.5);
+}
+.plate2::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #0a2190;
+  mix-blend-mode: color;
+}
+.plate2::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(1, 2, 12, 0.7));
+}
+.video {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---------- the players' tunnel: four walls around a portal ---------- */
+.tunnel {
+  --x1: 37%;
+  --x2: 63%;
+  --y1: 41%;
+  --y2: 67%;
+  position: absolute;
+  inset: 0;
+  transform: scale(calc(1 + var(--tun) * 11));
+  transform-origin: 50% 54%;
+  opacity: calc((1 - var(--tun)) * 12);
+  will-change: transform;
+}
+.tunnel i {
+  position: absolute;
+  inset: 0;
+}
+.ceil {
+  clip-path: polygon(0 0, 100% 0, var(--x2) var(--y1), var(--x1) var(--y1));
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 1px), rgba(255, 255, 255, 0.035) calc(12.5% - 1px) 12.5%),
+    linear-gradient(#03061a 5%, #2b3b8c);
+}
+.floor {
+  clip-path: polygon(0 100%, var(--x1) var(--y2), var(--x2) var(--y2), 100% 100%);
+  background: linear-gradient(0deg, #020414 5%, #34407e);
+}
+.floor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, transparent 40%, rgba(255, 249, 220, 0.16));
+  opacity: var(--lit);
+}
+.wallL {
+  clip-path: polygon(0 0, var(--x1) var(--y1), var(--x1) var(--y2), 0 100%);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(9% - 2px), rgba(0, 0, 0, 0.55) calc(9% - 2px) 9%),
+    linear-gradient(90deg, #02041a 5%, #24337c);
+}
+.wallR {
+  clip-path: polygon(100% 0, 100% 100%, var(--x2) var(--y2), var(--x2) var(--y1));
+  background:
+    repeating-linear-gradient(270deg, transparent 0 calc(9% - 2px), rgba(0, 0, 0, 0.55) calc(9% - 2px) 9%),
+    linear-gradient(270deg, #02041a 5%, #24337c);
+}
+.stripe {
+  clip-path: polygon(47.6% 100%, 52.4% 100%, 50.25% var(--y2), 49.75% var(--y2));
+  background: linear-gradient(0deg, rgba(249, 215, 22, 0.25), rgba(249, 215, 22, 0.9));
+}
+.lights {
+  /* Strip lights down the ceiling, converging on the portal. */
+  clip-path: polygon(48.6% 0, 51.4% 0, 50.2% var(--y1), 49.8% var(--y1));
+  background: repeating-linear-gradient(180deg, #e9ecff 0 2.4%, transparent 2.4% 8%);
+  opacity: 0.55;
+}
+.portalEdge {
+  inset: auto !important;
+  left: var(--x1);
+  top: var(--y1);
+  width: calc(var(--x2) - var(--x1));
+  height: calc(var(--y2) - var(--y1));
+  box-shadow:
+    0 0 0 1px rgba(255, 252, 235, calc(0.08 + var(--lit) * 0.3)),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Film grain, stepped so it reads as projection rather than shimmer. */
+.grain {
+  position: absolute;
+  inset: -50%;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0.13;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 0.5s steps(4) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-6%, 4%); }
+  50% { transform: translate(5%, -3%); }
+  75% { transform: translate(-3%, -6%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---------- type ---------- */
+.mask {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em 0.04em;
+  margin-block: -0.08em -0.04em;
+}
+.mask > span {
+  display: block;
+  /* --k runs 0 → 1 (in) → 2 (out): enters from below, leaves upward. */
+  transform: translate3d(0, calc((1 - var(--k)) * 112%), 0);
+  will-change: transform;
+}
+
+.c1,
+.c2,
+.c3,
+.c2back {
+  position: absolute;
+  inset: var(--hh) 0 var(--foot);
+  pointer-events: none;
+}
+
+.h1,
+.h2,
+.h3 {
+  margin: 0;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 900;
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+}
+
+.c1 {
+  z-index: 10;
+}
+.h1 {
+  position: absolute;
+  top: clamp(20px, 6svh, 72px);
+  inset-inline-end: var(--pad);
+  font-size: clamp(54px, 9.6vw, 176px);
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.35);
+}
+.giant1 {
+  position: absolute;
+  bottom: -0.2em;
+  left: 0;
+  z-index: -1;
+  margin: 0;
+  direction: ltr;
+  white-space: nowrap;
+  font-size: 19.5vw;
+  line-height: 0.8;
+  color: var(--paper);
+  transform: translate3d(calc(-3vw - var(--h1x) * 22vw), 0, 0);
+  clip-path: inset(calc((1 - var(--g1)) * 100%) 0 0 0);
+  opacity: calc(2 - var(--h1b));
+  will-change: transform;
+}
+.tech1 {
+  position: absolute;
+  top: calc(clamp(20px, 6svh, 72px) + 6px);
+  inset-inline-start: var(--pad);
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: rgba(244, 242, 234, 0.7);
+  opacity: calc(2 - var(--h1a));
+}
+
+/* Chapter two. The Latin sits behind the shirts, the Hebrew in front. */
+.c2back {
+  z-index: 2;
+  direction: ltr;
+  color: var(--paper);
+  clip-path: inset(calc((1 - min(var(--h2a), 1)) * 100%) 0 0 0);
+  opacity: calc((2 - var(--h2a)) * 0.92);
+}
+.c2back span {
+  position: absolute;
+  top: -0.04em;
+  left: 0;
+  font-size: min(22vw, 34svh);
+  line-height: 0.8;
+  white-space: nowrap;
+  transform: translate3d(calc(var(--p) * -14vw + 2vw), 0, 0);
+  will-change: transform;
+}
+
+.c2 {
+  z-index: 10;
+}
+.c2::before {
+  /* A scrim only where the headline sits. */
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 70%;
+  height: 55%;
+  background: linear-gradient(to top left, rgba(1, 2, 12, 0.8), transparent 65%);
+  opacity: calc(min(var(--h2a), 1) * (2 - var(--h2a)));
+}
+[dir="rtl"] .c2::before {
+  background: linear-gradient(to top left, rgba(1, 2, 12, 0.8), transparent 65%);
+}
+.h2 {
+  position: absolute;
+  bottom: clamp(18px, 5svh, 56px);
+  inset-inline-start: var(--pad);
+  font-size: clamp(46px, 8vw, 148px);
+}
+.roster {
+  position: absolute;
+  bottom: clamp(22px, 5.4svh, 60px);
+  inset-inline-end: var(--pad);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: calc(min(var(--h2b), 1) * (2 - var(--h2b)));
+}
+.roster li {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid rgba(244, 242, 234, 0.3);
+  padding-top: 4px;
+  min-width: 120px;
+}
+.roster .latin,
+.roster li > span {
+  color: var(--yellow);
+}
+
+/* ---------- the shirts ---------- */
+.orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  perspective: 1500px;
+  perspective-origin: 50% 45%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.shirt {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: var(--sw);
+  margin-left: calc(var(--sw) / -2);
+  margin-top: calc(var(--sw) / -2);
+  opacity: 0;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+.shirt img {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.tag {
+  position: absolute;
+  top: 96%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--paper);
+  opacity: var(--tags);
+}
+.tag b {
+  color: var(--yellow);
+  font-weight: 400;
+}
+
+/* ---------- chapter three: the yellow ---------- */
+.yellow {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background:
+    radial-gradient(rgba(0, 14, 98, 0.09) 1px, transparent 1.3px) 0 0 / 7px 7px,
+    var(--yellow);
+  clip-path: polygon(
+    0 calc(100% - var(--wipe) * 135%),
+    100% calc(100% - var(--wipe) * 135% + 35%),
+    100% 100%,
+    0 100%
+  );
+}
+.trophy {
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.35) brightness(1.1);
+  mix-blend-mode: multiply;
+  opacity: 0.3;
+  transform: scale(calc(1.12 - var(--big) * 0.12));
+}
+
+.c3 {
+  z-index: 10;
+  color: var(--navy);
+}
+.crest {
+  position: absolute;
+  top: clamp(18px, 5svh, 56px);
+  inset-inline-start: var(--pad);
+  width: clamp(76px, 8.4vw, 132px);
+  height: auto;
+  opacity: var(--crestO);
+  transform: scale(calc(3.2 - 2.2 * var(--crest))) rotate(calc((1 - var(--crest)) * -28deg));
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.ring {
+  position: absolute;
+  top: clamp(18px, 5svh, 56px);
+  inset-inline-start: var(--pad);
+  width: clamp(76px, 8.4vw, 132px);
+  aspect-ratio: 1;
+  border: 2px solid var(--navy);
+  border-radius: 50%;
+  transform: scale(calc(1 + var(--ring) * 1.6));
+  opacity: calc(min(var(--ring) * 30, 1) * (1 - var(--ring)));
+}
+.h3 {
+  position: absolute;
+  top: calc(clamp(18px, 5svh, 56px) + clamp(76px, 8.4vw, 132px) + clamp(16px, 3svh, 36px));
+  inset-inline-start: var(--pad);
+  font-size: clamp(60px, 10.8vw, 196px);
+}
+.h3 .latin {
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.spec {
+  position: absolute;
+  bottom: calc(clamp(18px, 5svh, 56px) + 76px);
+  inset-inline-start: var(--pad);
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: var(--cta);
+}
+.spec .latin {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+}
+.ctas {
+  position: absolute;
+  bottom: clamp(18px, 5svh, 56px);
+  inset-inline-start: var(--pad);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  opacity: var(--cta);
+  transform: translate3d(0, calc((1 - var(--cta)) * 18px), 0);
+}
+.stage[data-ch="2"] .ctas,
+.ctas:focus-within {
+  pointer-events: auto;
+}
+.ctas:focus-within {
+  opacity: 1;
+  transform: none;
+}
+.buy,
+.print {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 60px;
+  padding: 0 26px;
+  border-radius: 2px;
+  font-weight: 800;
+  font-size: 17px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.buy {
+  background: var(--navy);
+  color: var(--paper);
+}
+.buy:hover {
+  background: var(--ink);
+}
+.price {
+  padding-inline-start: 18px;
+  border-inline-start: 1px solid rgba(244, 242, 234, 0.3);
+  font-weight: 500;
+}
+.print {
+  box-shadow: inset 0 0 0 2px var(--navy);
+  color: var(--navy);
+}
+.print:hover {
+  background: var(--navy);
+  color: var(--yellow);
+}
+.buy:focus-visible,
+.print:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 3px;
+}
+
+/* ---------- the slate: paper frame with technical labels ---------- */
+.slate {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  height: var(--foot);
+  padding-inline: calc(var(--side) + 14px);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--paper);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  transition: color 0.3s;
+}
+.stage[data-ch="2"] .slate {
+  color: var(--navy);
+}
+.count {
+  direction: ltr;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.count b {
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.chName {
+  margin-left: 10px;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+}
+.rule {
+  flex: 1;
+  height: 1px;
+  background: rgba(244, 242, 234, 0.2);
+}
+.stage[data-ch="2"] .rule {
+  background: rgba(0, 14, 98, 0.2);
+}
+.rule i {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  transform: scaleX(var(--p));
+  transform-origin: right;
+}
+.slateEnd {
+  white-space: nowrap;
+}
+.sideA,
+.sideB {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: rgba(244, 242, 234, 0.55);
+  white-space: nowrap;
+  opacity: var(--frame);
+}
+.sideA {
+  right: calc(var(--side) / 2);
+  transform: translate(50%, -50%) rotate(90deg);
+}
+.sideB {
+  left: calc(var(--side) / 2);
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+/* ---------- skip link ---------- */
+.skip {
+  position: absolute;
+  z-index: 60;
+  top: calc(var(--header-h, 72px) + 12px);
+  inset-inline-start: 16px;
+  padding: 12px 18px;
+  background: var(--yellow);
+  color: var(--navy);
+  font-weight: 800;
+  border-radius: 2px;
+  transform: translateY(-300%);
+  opacity: 0;
+}
+.skip:focus {
+  transform: none;
+  opacity: 1;
+}
+
+/* ---------- portrait composition (phones) ---------- */
+@media (max-aspect-ratio: 20/21) {
+  .stage {
+    --sw: min(62vw, 520px);
+    --foot: 46px;
+  }
+  .plateImg {
+    object-position: 64% 50%;
+  }
+  .tunnel {
+    --x1: 24%;
+    --x2: 76%;
+    --y1: 47%;
+    --y2: 64%;
+    transform-origin: 50% 55.5%;
+  }
+  .h1 {
+    top: auto;
+    bottom: calc(26vw * 0.62 + 28px);
+    inset-inline-end: auto;
+    inset-inline-start: var(--pad);
+    font-size: clamp(52px, 15.5vw, 110px);
+  }
+  .giant1 {
+    font-size: 26vw;
+  }
+  .plate1 {
+    transform-origin: 64% 0%;
+  }
+  .tech1 {
+    font-size: 10px;
+  }
+  .c2back span {
+    font-size: 30vw;
+    top: 0.1em;
+  }
+  .h2 {
+    font-size: clamp(44px, 13.5vw, 100px);
+    bottom: calc(clamp(18px, 5svh, 56px) + 62px);
+  }
+  .roster {
+    inset-inline-end: auto;
+    inset-inline-start: var(--pad);
+    grid-auto-flow: column;
+    gap: 12px;
+    bottom: clamp(18px, 4svh, 40px);
+  }
+  .roster li {
+    min-width: 0;
+  }
+  .c2::before {
+    width: 100%;
+    background: linear-gradient(to top, rgba(1, 2, 12, 0.85), transparent 70%);
+  }
+  [dir="rtl"] .c2::before {
+    background: linear-gradient(to top, rgba(1, 2, 12, 0.85), transparent 70%);
+  }
+  .crest,
+  .ring {
+    width: 64px;
+    top: 16px;
+    inset-inline-start: auto;
+    inset-inline-end: var(--pad);
+  }
+  .h3 {
+    top: auto;
+    bottom: calc(clamp(18px, 3svh, 32px) + 132px + 36px);
+    font-size: clamp(56px, 16.5vw, 110px);
+  }
+  .spec {
+    bottom: calc(clamp(18px, 3svh, 32px) + 132px);
+  }
+  .spec span:last-child {
+    display: none;
+  }
+  .ctas {
+    bottom: clamp(18px, 3svh, 32px);
+    inset-inline-end: var(--pad);
+    display: grid;
+  }
+  .buy,
+  .print {
+    justify-content: space-between;
+    min-height: 56px;
+  }
+  .slateEnd {
+    display: none;
+  }
+}
+
+/* ---------- reduced motion: one composed poster, no pinning ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .film {
+    height: auto;
+  }
+  .stage {
+    --tun: 1;
+    --cam: 1;
+    --L0: 1;
+    --L1: 1;
+    --L2: 1;
+    --L3: 1;
+    --lit: 1;
+    --h1a: 2;
+    --h1b: 2;
+    --g1: 1;
+    --dim: 1;
+    --h2a: 2;
+    --h2b: 2;
+    --wipe: 1;
+    --frame: 0;
+    --crest: 1;
+    --crestO: 1;
+    --ring: 1;
+    --h3a: 1;
+    --h3b: 1;
+    --big: 1;
+    --cta: 1;
+    --p: 1;
+    position: relative;
+    height: 100svh;
+    min-height: 640px;
+  }
+  .ctas {
+    pointer-events: auto;
+  }
+  /* Keep a dark bar under the transparent header (white type). */
+  .screen {
+    clip-path: inset(var(--hh) 0 0 0);
+  }
+  .c1,
+  .c2,
+  .c3,
+  .c2back {
+    bottom: 0;
+  }
+  .grain {
+    animation: none;
+  }
+  .tunnel,
+  .slate,
+  .sideA,
+  .sideB {
+    display: none;
+  }
+  .shirt[data-kit="home"] {
+    opacity: 1;
+    transform: translate3d(-20vw, 5svh, 0) scale(1.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) and (max-aspect-ratio: 20/21) {
+  .shirt[data-kit="home"] {
+    transform: translate3d(0, -12svh, 0) scale(1.2);
+  }
+}
+
+@media (max-width: 899px) {
+  .sideA,
+  .sideB {
+    display: none;
+  }
+}

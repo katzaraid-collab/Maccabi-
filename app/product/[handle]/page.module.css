@@ -1,14 +1,13 @@
 .page {
-  padding-top: calc(var(--header-h) + 20px);
-  padding-bottom: 40px;
+  padding-top: var(--header-h);
 }
 .crumbs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 14px;
+  padding: 14px var(--gutter);
+  font-size: 12px;
   color: var(--muted);
-  margin-bottom: 20px;
 }
 .crumbs a:hover {
   color: var(--navy);
@@ -16,5 +15,17 @@
 }
 .crumbs [aria-current] {
   color: var(--navy);
-  font-weight: 600;
+  font-weight: 700;
+}
+@media (max-width: 900px) {
+  .crumbs {
+    padding-block: 10px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .crumbs [aria-current] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

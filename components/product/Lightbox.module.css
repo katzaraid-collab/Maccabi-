@@ -1,0 +1,139 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--white);
+  color: var(--navy);
+  animation: in 0.35s var(--ease-out);
+}
+@keyframes in {
+  from {
+    opacity: 0;
+  }
+}
+.bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  padding: 10px var(--gutter);
+  border-bottom: 1px solid var(--line);
+}
+.count {
+  font-family: var(--font-latin-display), sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+}
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+.close,
+.nav {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.close:hover,
+.nav:hover {
+  background: var(--paper);
+}
+.close:focus-visible,
+.nav:focus-visible,
+.frame:focus-visible,
+.thumbs button:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: -3px;
+}
+.stage {
+  position: relative;
+  min-height: 0;
+  touch-action: pan-y pinch-zoom;
+}
+.frame {
+  position: absolute;
+  inset: 0 72px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  cursor: zoom-in;
+  animation: in 0.4s var(--ease-out);
+}
+.img {
+  object-fit: contain;
+  transition: transform 0.45s var(--ease-out);
+}
+.frame[data-zoomed="true"] {
+  cursor: zoom-out;
+}
+.frame[data-zoomed="true"] .img {
+  transform: scale(2.4);
+  transform-origin: var(--zx, 50%) var(--zy, 50%);
+}
+.nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.prev {
+  inset-inline-start: 12px;
+}
+.next {
+  inset-inline-end: 12px;
+}
+.thumbs {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+}
+.thumbs button {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.thumbs button img {
+  object-fit: contain;
+}
+.thumbs button[aria-current="true"] {
+  opacity: 1;
+  box-shadow: inset 0 -2px 0 var(--navy);
+}
+@media (max-width: 700px) {
+  .frame {
+    inset: 0;
+  }
+  .nav {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .frame {
+    animation: none;
+  }
+  .img {
+    transition: none;
+  }
+}

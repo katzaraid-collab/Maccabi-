@@ -1,15 +1,20 @@
 .card {
+  position: relative;
   display: grid;
-  gap: 14px;
+  gap: 12px;
   align-content: start;
 }
-.media {
+.mediaWrap {
   position: relative;
   aspect-ratio: 4 / 5;
-  border-radius: var(--radius);
   overflow: hidden;
   background: var(--white);
   isolation: isolate;
+}
+.media {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 .img,
 .alt {
@@ -22,19 +27,18 @@
 .alt {
   opacity: 0;
 }
-.card:hover .img {
-  transform: scale(1.06);
+.mediaWrap:hover .img {
+  transform: scale(1.05);
 }
-.card:hover .alt {
+.mediaWrap:hover .alt {
   opacity: 1;
 }
-.card:hover .alt + .img,
-.card:hover .img:has(+ .alt) {
+.mediaWrap:hover .img:has(+ .alt) {
   opacity: 0;
 }
 .card[data-soldout="true"] .img {
   filter: grayscale(0.7);
-  opacity: 0.6;
+  opacity: 0.55;
 }
 .placeholder {
   position: absolute;
@@ -47,18 +51,20 @@
 }
 .flags {
   position: absolute;
-  top: 12px;
-  inset-inline-start: 12px;
+  top: 10px;
+  inset-inline-start: 10px;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   z-index: 1;
+  pointer-events: none;
 }
 .flag {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 5px 10px;
-  border-radius: 99px;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 2px;
   background: var(--navy);
   color: var(--white);
 }
@@ -71,17 +77,16 @@
 }
 .print {
   background: var(--white);
-  color: var(--blue);
+  color: var(--navy);
   box-shadow: inset 0 0 0 1px var(--line);
 }
 .body {
   display: grid;
   gap: 4px;
-  padding-inline: 4px;
 }
 .title {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
   display: -webkit-box;
@@ -89,15 +94,107 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.title a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.title a:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
 .price {
   display: flex;
   gap: 10px;
   align-items: baseline;
 }
 .price strong {
-  font-size: 17px;
+  font-size: 15px;
+  font-weight: 800;
 }
 .price s {
   color: var(--muted);
+  font-size: 13px;
+}
+
+/* Quick add: slides up over the bottom of the image on hover or keyboard focus. */
+.quick {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .quick {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 2;
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid var(--line);
+    transform: translateY(101%);
+    transition: transform 0.35s var(--ease-out);
+  }
+  .mediaWrap:hover .quick,
+  .quick:focus-within {
+    transform: none;
+  }
+}
+.quickLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.quickSizes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+}
+.quickSizes button,
+.quickOne {
+  height: 36px;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  background: var(--white);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.quickSizes button:hover:not(:disabled),
+.quickOne:hover {
+  background: var(--navy);
+  color: var(--white);
+}
+.quickSizes button[data-done="true"] {
+  background: var(--yellow);
+  color: var(--navy);
+}
+.quickSizes button:disabled {
+  color: rgba(0, 14, 98, 0.3);
+  cursor: not-allowed;
+  background: linear-gradient(to top right, transparent calc(50% - 0.5px), rgba(0, 14, 98, 0.2) 50%, transparent calc(50% + 0.5px));
+}
+.quickSizes button:focus-visible,
+.quickOne:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 1px;
+}
+.quickOne {
+  height: 44px;
+  background: var(--navy);
+  color: var(--white);
+  box-shadow: none;
   font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick,
+  .img,
+  .alt {
+    transition: none;
+  }
 }

@@ -1,197 +1,476 @@
+/* The root is a fixed, viewport-sized clip box. Closed, it is also
+   visibility:hidden (after the slide-out finishes), so the off-canvas panel can
+   never be panned, zoomed, printed or screenshotted into view — the old bug was
+   page overflow in RTL extending the canvas leftwards over the parked panel. */
 .root {
   position: fixed;
   inset: 0;
   z-index: 60;
+  overflow: hidden;
   pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear 0.6s;
 }
 .root[data-open="true"] {
   pointer-events: auto;
+  visibility: visible;
+  transition-delay: 0s;
 }
 .scrim {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(0, 7, 58, 0.55);
-  backdrop-filter: blur(4px);
+  padding: 0;
+  background: rgba(0, 7, 58, 0.5);
   opacity: 0;
-  transition: opacity 0.4s var(--ease-out);
+  cursor: pointer;
+  transition: opacity 0.45s var(--ease-out);
 }
 .root[data-open="true"] .scrim {
   opacity: 1;
 }
+
+/* RTL: inline-end is the left edge, so the panel slides in from the left —
+   the same side as the header cart icon. */
 .panel {
   position: absolute;
   inset-block: 0;
   inset-inline-end: 0;
-  width: min(440px, 100%);
+  width: min(480px, 100%);
   display: flex;
   flex-direction: column;
   background: var(--paper);
   transform: translateX(-100%);
-  transition: transform 0.55s var(--ease-out);
+  transition: transform 0.6s var(--ease-out);
   outline: none;
   box-shadow: var(--shadow-lg);
 }
-/* RTL: inline-end is the left edge, so the panel slides in from the left. */
 .root[data-open="true"] .panel {
   transform: none;
 }
+
+/* ---------- Head ---------- */
 .head {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 22px 24px;
-  border-bottom: 1px solid var(--line);
+  gap: 16px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--navy);
+}
+.kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
 }
 .title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 900;
+  font-size: 44px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 }
 .count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 99px;
-  background: var(--yellow);
-  font-size: 14px;
+  font-size: 18px;
+  padding: 3px 6px 2px;
+  background: var(--navy);
+  color: var(--yellow);
+  border-radius: var(--radius-sm);
+  margin-top: 2px;
 }
 .close {
-  border: 0;
+  border: 1px solid var(--line-strong);
   background: transparent;
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--dur-1),
+    color var(--dur-1);
 }
 .close:hover {
-  background: var(--line);
+  background: var(--navy);
+  color: var(--white);
 }
+@media (hover: none) {
+  .close:hover {
+    background: transparent;
+    color: inherit;
+  }
+}
+
+/* ---------- Undo ---------- */
+.undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 24px;
+  background: var(--navy);
+  color: var(--white);
+  font-size: 13px;
+  --focus: var(--yellow);
+  animation: drop 0.35s var(--ease-out);
+}
+.undo span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.undo button {
+  flex: none;
+  border: 0;
+  background: none;
+  color: var(--yellow);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 4px 0;
+}
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* ---------- Empty ---------- */
 .empty {
   flex: 1;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   padding: 24px;
+  overflow-y: auto;
 }
-.empty :global(.display) {
-  font-size: 48px;
+.emptyTitle {
+  font-size: clamp(64px, 18vw, 92px);
 }
-.empty p {
-  margin: 0 0 12px;
+.emptyLead {
+  margin: 14px 0 28px;
+  font-size: 17px;
+  color: var(--muted);
 }
+.start {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--navy);
+}
+.start li {
+  border-bottom: 1px solid var(--line-strong);
+}
+.start a {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 0;
+  font-weight: 800;
+  font-size: 18px;
+  transition:
+    padding var(--dur-2) var(--ease-out),
+    background var(--dur-2);
+}
+.start a:hover {
+  padding-inline: 10px;
+  background: var(--yellow);
+}
+.startIdx {
+  font-size: 14px;
+  color: var(--muted);
+}
+.startArrow {
+  transition: transform var(--dur-2) var(--ease-out);
+}
+.start a:hover .startArrow {
+  transform: translateX(-4px);
+}
+
+/* ---------- Lines ---------- */
 .lines {
   list-style: none;
   margin: 0;
-  padding: 8px 24px;
+  padding: 0 24px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   flex: 1;
 }
+/* Rows collapse through a 1fr→0fr grid track so neighbours glide up. */
 .line {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.32s var(--ease-in-out),
+    opacity 0.25s;
+  animation: line-in 0.55s var(--ease-out) both;
+}
+.line[data-leaving] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+@keyframes line-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+.lineInner {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 104px 1fr;
   gap: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line-strong);
+}
+/* The freshly added line gets a yellow blade that sweeps once. */
+.line[data-new] .lineInner::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  background: var(--yellow);
+  transform-origin: top;
+  animation: blade 1.2s var(--ease-out) 0.35s both;
+}
+@keyframes blade {
+  from {
+    transform: scaleY(0);
+  }
+}
+.lineIdx {
+  position: absolute;
+  top: 22px;
+  inset-inline-start: 6px;
+  z-index: 1;
+  font-size: 12px;
+  color: var(--muted);
 }
 .thumb {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
+  background: var(--white);
   border-radius: var(--radius-sm);
   overflow: hidden;
-  background: var(--white);
 }
 .thumb img {
-  object-fit: cover;
+  object-fit: contain;
+  padding: 6%;
+  transition: transform 0.6s var(--ease-out);
+}
+.lineInner:hover .thumb img {
+  transform: scale(1.05);
 }
 .info {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   align-content: start;
   min-width: 0;
 }
 .name {
-  font-weight: 700;
-  line-height: 1.3;
+  font-weight: 800;
+  line-height: 1.25;
+  font-size: 15px;
+}
+.name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .meta {
-  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  font-size: 13px;
   color: var(--muted);
-  display: grid;
 }
-.print {
-  color: var(--blue);
+.meta div {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.meta dt {
+  font-size: 12px;
+}
+.meta dd {
+  margin: 0;
+  color: var(--navy);
   font-weight: 700;
 }
+.meta :global(.latin) {
+  font-size: 15px;
+}
+
+/* Name + number as they'd sit on the back of the shirt. */
+.print {
+  display: flex;
+  align-items: stretch;
+  width: fit-content;
+  max-width: 100%;
+  background: var(--navy);
+  color: var(--yellow);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.printNum {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  padding: 4px 8px;
+  font-size: 26px;
+  line-height: 1;
+  background: var(--yellow);
+  color: var(--navy);
+}
+.printText {
+  display: grid;
+  padding: 5px 12px;
+  line-height: 1.2;
+  min-width: 0;
+}
+.printText :global(.tag-he) {
+  font-size: 10px;
+  opacity: 0.75;
+}
+.printText strong {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
 }
 .qty {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 99px;
+  display: inline-grid;
+  grid-template-columns: 36px 36px 36px;
+  align-items: stretch;
+  height: 36px;
+  border: 1px solid var(--navy);
+  border-radius: var(--radius-sm);
   background: var(--white);
 }
 .qty button {
   border: 0;
   background: transparent;
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
+  display: grid;
+  place-items: center;
+  transition:
+    background var(--dur-1),
+    color var(--dur-1);
 }
-.qty span {
-  min-width: 22px;
-  text-align: center;
-  font-weight: 700;
+.qty button:hover:not(:disabled) {
+  background: var(--navy);
+  color: var(--white);
+}
+.qty button:disabled {
+  opacity: 0.3;
+}
+.qty output {
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  border-inline: 1px solid var(--line-strong);
+}
+.linePrice {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
 }
 .remove {
   justify-self: start;
   border: 0;
   background: none;
-  padding: 0;
-  font-size: 13px;
+  padding: 2px 0;
+  font-size: 12px;
   color: var(--muted);
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
+.remove:hover {
+  color: var(--sale);
+}
+
+/* ---------- Summary ---------- */
 .foot {
-  padding: 20px 24px 24px;
-  border-top: 1px solid var(--line);
+  padding: 18px 24px 22px;
+  border-top: 1px solid var(--navy);
   display: grid;
-  gap: 10px;
+  gap: 12px;
   background: var(--white);
 }
-.total {
+.summary {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.summary div {
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  align-items: baseline;
+  font-size: 14px;
+  color: var(--muted);
+}
+.summary dd {
+  margin: 0;
+  color: var(--navy);
+  font-weight: 700;
+}
+.summary .total {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--navy);
+  font-weight: 800;
+  font-size: 16px;
+}
+.summary .total dd {
+  font-size: 24px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
 }
 .note {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--muted);
 }
-.pay {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
+.note :global(.tag-he) {
+  color: var(--navy);
+  background: var(--yellow);
+  padding: 1px 5px;
+  margin-inline-end: 4px;
 }
-.pay span {
-  font-size: 11px;
+.continue {
+  justify-self: center;
+  border: 0;
+  background: none;
   font-weight: 700;
-  padding: 4px 8px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--muted);
+  font-size: 14px;
+  padding: 6px 4px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 480px) {
+  .lineInner {
+    grid-template-columns: 84px 1fr;
+    gap: 12px;
+  }
+  .head,
+  .foot {
+    padding-inline: 18px;
+  }
+  .lines {
+    padding-inline: 18px;
+  }
 }

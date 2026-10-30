@@ -1,0 +1,237 @@
+.gallery {
+  position: relative;
+  min-width: 0;
+}
+.track {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.tile {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--white);
+  overflow: hidden;
+  perspective: 2400px;
+}
+.hero {
+  grid-column: span 2;
+}
+/* An odd tile left over at the end gets the full row rather than a hole. */
+.tile:not(.hero):last-child:nth-child(even) {
+  grid-column: span 2;
+  aspect-ratio: 16 / 10;
+}
+
+.zoomable {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: var(--white);
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.zoomable:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: -3px;
+}
+.img {
+  object-fit: contain;
+  transition: transform 0.45s var(--ease-out);
+}
+.zoomable[data-zoom="true"] .img {
+  transform: scale(2.1);
+  transform-origin: var(--zx, 50%) var(--zy, 50%);
+  transition: transform 0.25s var(--ease-out);
+}
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-latin-display), sans-serif;
+  font-size: 120px;
+  color: var(--line);
+}
+
+/* Photo <-> back-of-shirt flip */
+.flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.9s var(--ease-out);
+}
+.flip[data-flipped="true"] {
+  transform: rotateY(-180deg);
+}
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.back {
+  transform: rotateY(180deg);
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(255, 255, 255, 0.09), transparent 70%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.25), transparent 30%),
+    var(--navy);
+}
+.backLabel {
+  position: absolute;
+  bottom: 18px;
+  inset-inline-start: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.7);
+}
+.back::after {
+  /* the studio floor line */
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 48px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.jersey {
+  width: 72%;
+  height: auto;
+  filter: drop-shadow(0 34px 34px rgba(0, 0, 0, 0.35));
+  transform: translateY(-2%);
+}
+
+.toggle {
+  position: absolute;
+  top: 16px;
+  inset-inline-start: 16px;
+  z-index: 2;
+  display: flex;
+  background: var(--white);
+  box-shadow: 0 0 0 1px var(--navy);
+}
+.toggle button {
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.toggle button[aria-pressed="true"] {
+  background: var(--navy);
+  color: var(--white);
+}
+.toggle button:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+.index {
+  position: absolute;
+  bottom: 16px;
+  left: 18px; /* physical: the label is dir=ltr, and the RTL end edge is the left */
+  z-index: 1;
+  font-family: var(--font-latin-display), sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  pointer-events: none;
+}
+.flip[data-flipped="true"] ~ .index,
+.hero:has(.flip[data-flipped="true"]) .index {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dots {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .track {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+  .tile,
+  .tile:not(.hero):last-child:nth-child(even) {
+    flex: 0 0 100%;
+    aspect-ratio: 1;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .zoomable {
+    cursor: pointer;
+  }
+  .index {
+    display: none;
+  }
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 0 0;
+  }
+  .dots button {
+    position: relative;
+    width: 32px;
+    height: 24px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .dots button::after {
+    content: "";
+    position: absolute;
+    inset-inline: 4px;
+    top: 11px;
+    height: 2px;
+    background: var(--line);
+    transition: background 0.3s;
+  }
+  .dots button[aria-current="true"]::after {
+    background: var(--navy);
+  }
+  .dots button:focus-visible {
+    outline: 2px solid var(--blue);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip,
+  .img {
+    transition: none;
+  }
+}
+/* A blue shirt disappears on navy: the away kit gets the paper studio instead. */
+.flip[data-kit="away"] .back {
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(255, 255, 255, 0.7), transparent 70%),
+    #e9e6dc;
+}
+.flip[data-kit="away"] .backLabel {
+  color: var(--muted);
+}
+.flip[data-kit="away"] .back::after {
+  background: var(--line);
+}
+
+.hero:has(.flip[data-flipped="true"]:not([data-kit="away"])) .toggle {
+  box-shadow: 0 0 0 1px var(--white);
+}
+.hero:has(.flip[data-flipped="true"]:not([data-kit="away"])) .toggle button[aria-pressed="false"] {
+  background: var(--white);
+}

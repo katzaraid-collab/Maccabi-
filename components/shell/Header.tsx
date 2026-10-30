@@ -1,136 +1,77 @@
-"use client";
+import { DEPARTMENTS, productsIn } from "@/lib/catalog";
+import { AUDIENCES, DEPT_LATIN, DEPT_PHOTO, KITS, TYPES, techLabel, typeOf, type DeptPhoto } from "@/components/shop/taxonomy";
+import { HeaderBar } from "./HeaderBar";
 
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useCart } from "@/components/cart/CartProvider";
-import { CLUB_SITE } from "@/lib/config";
-import s from "./Header.module.css";
+export type MenuLink = { label: string; href: string; count: number };
+export type MenuCol = { title: string; links: MenuLink[] };
+export type MenuProduct = { href: string; title: string; price: number; compareAt: number | null; image: string; label: string };
+export type MenuDept = {
+  slug: string;
+  href: string;
+  label: string;
+  title: string;
+  latin: string;
+  kicker: string;
+  count: number;
+  hot?: boolean;
+  cols: MenuCol[];
+  photo: DeptPhoto | null;
+  product: MenuProduct | null;
+};
 
-const NAV = [
-  { href: "/shop/new", label: "26/27" },
-  { href: "/shop/kits", label: "תלבושות משחק" },
-  { href: "/shop/training", label: "אימון וייצוג" },
-  { href: "/shop/fashion", label: "אופנה ורטרו" },
-  { href: "/shop/kids", label: "ילדים" },
-  { href: "/shop/accessories", label: "אביזרים" },
-  { href: "/shop/sale", label: "SALE", hot: true },
+const NAV: { slug: string; label: string; hot?: boolean }[] = [
+  { slug: "new", label: "26/27" },
+  { slug: "kits", label: "תלבושות משחק" },
+  { slug: "training", label: "אימון וייצוג" },
+  { slug: "fashion", label: "אופנה ורטרו" },
+  { slug: "kids", label: "ילדים" },
+  { slug: "accessories", label: "אביזרים" },
+  { slug: "sale", label: "SALE", hot: true },
 ];
 
-export function Header() {
-  const { count, setOpen } = useCart();
-  const [scrolled, setScrolled] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const [search, setSearch] = useState(false);
-  const [bump, setBump] = useState(false);
-  const pathname = usePathname();
-  const router = useRouter();
-  // Pages that open on a dark hero get a transparent header until you scroll.
-  const overHero = pathname === "/";
+// Server half of the header: builds the mega menu from the live catalog so
+// every column link points at a filter that actually returns products.
+export async function Header() {
+  const depts: MenuDept[] = await Promise.all(
+    NAV.map(async (n) => {
+      const dept = DEPARTMENTS.find((d) => d.slug === n.slug)!;
+      const list = await productsIn(n.slug);
+      const live = list.filter((p) => p.available);
+      const href = `/shop/${n.slug}`;
+      const tally = (keys: { key: string; label: string }[], has: (k: string, p: (typeof list)[number]) => boolean, param: string) =>
+        keys
+          .map((k) => ({ label: k.label, href: `${href}?${param}=${k.key}`, count: live.filter((p) => has(k.key, p)).length }))
+          .filter((l) => l.count > 0);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+      const kits = tally(KITS, (k, p) => p.kit === k, "kit");
+      const types = tally(TYPES, (k, p) => typeOf(p) === k, "type")
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 7);
+      const auds = tally(AUDIENCES, (k, p) => AUDIENCES.find((a) => a.key === k)!.test(p, ""), "aud");
 
-  useEffect(() => {
-    setMenu(false);
-    setSearch(false);
-  }, [pathname]);
+      const cols: MenuCol[] = [];
+      if (kits.length > 1) cols.push({ title: "ערכות", links: kits.map((l) => ({ ...l, label: `ערכת ${l.label}` })) });
+      if (types.length > 1) cols.push({ title: "לפי סוג", links: types });
+      if (auds.length > 1 && n.slug !== "kids") cols.push({ title: "למי", links: auds });
 
-  useEffect(() => {
-    if (!count) return;
-    setBump(true);
-    const t = setTimeout(() => setBump(false), 450);
-    return () => clearTimeout(t);
-  }, [count]);
-
-  useEffect(() => {
-    document.body.style.overflow = menu ? "hidden" : "";
-  }, [menu]);
-
-  const solid = scrolled || !overHero || menu;
-
-  return (
-    <>
-      <header className={s.header} data-solid={solid}>
-        <div className={`wrap ${s.inner}`}>
-          <button className={s.burger} onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-controls="mobile-menu" aria-label="תפריט">
-            <span />
-            <span />
-          </button>
-
-          <Link href="/" className={s.logo} aria-label="מכבי תל אביב – חנות רשמית, לדף הבית">
-            <Image src="/crest.png" alt="" width={48} height={48} priority />
-            <span className={s.wordmark}>
-              <strong>מכבי תל אביב</strong>
-              <small>החנות הרשמית</small>
-            </span>
-          </Link>
-
-          <nav className={s.nav} aria-label="ראשי">
-            {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className={s.link} data-hot={n.hot} aria-current={pathname === n.href ? "page" : undefined}>
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className={s.actions}>
-            <button className={s.icon} onClick={() => setSearch((v) => !v)} aria-label="חיפוש" aria-expanded={search}>
-              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
-                <path d="M20 20l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-            <button className={s.icon} onClick={() => setOpen(true)} aria-label={`הסל שלי, ${count} פריטים`}>
-              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" strokeWidth="2" />
-              </svg>
-              {count > 0 && (
-                <span className={s.badge} data-bump={bump}>
-                  {count}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-
-        <form
-          className={s.search}
-          data-open={search}
-          role="search"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const q = new FormData(e.currentTarget).get("q")?.toString().trim();
-            if (q) router.push(`/search?q=${encodeURIComponent(q)}`);
-          }}
-        >
-          <div className="wrap">
-            <label htmlFor="q" className="sr-only">
-              חיפוש מוצרים
-            </label>
-            <input id="q" name="q" type="search" placeholder="חולצת בית, צעיף, שם שחקן…" autoComplete="off" tabIndex={search ? 0 : -1} />
-          </div>
-        </form>
-      </header>
-
-      <div id="mobile-menu" className={s.menu} data-open={menu} inert={!menu}>
-        <nav aria-label="תפריט נייד">
-          {NAV.map((n, i) => (
-            <Link key={n.href} href={n.href} className={s.menuLink} style={{ "--i": i } as React.CSSProperties} data-hot={n.hot}>
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-        <a href={CLUB_SITE} className={s.menuClub}>
-          לאתר המועדון ↗
-        </a>
-      </div>
-    </>
+      const pick = live.find((p) => p.images.length && typeOf(p) === "shirts") ?? live.find((p) => p.images.length);
+      return {
+        slug: n.slug,
+        href,
+        label: n.label,
+        title: dept.title,
+        latin: DEPT_LATIN[n.slug] ?? "",
+        kicker: dept.kicker,
+        count: list.length,
+        hot: n.hot,
+        cols,
+        photo: DEPT_PHOTO[n.slug] ?? null,
+        product: pick
+          ? { href: `/product/${pick.handle}`, title: pick.title, price: pick.price, compareAt: pick.compareAt, image: pick.images[0].src, label: techLabel(pick) }
+          : null,
+      };
+    }),
   );
+
+  return <HeaderBar depts={depts} />;
 }

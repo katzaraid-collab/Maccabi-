@@ -1,0 +1,115 @@
+.page {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  background: var(--navy-deep);
+  color: var(--white);
+  isolation: isolate;
+}
+.photo {
+  object-fit: cover;
+  object-position: 60% 30%;
+  filter: grayscale(1) contrast(1.1);
+  z-index: -2;
+}
+/* Navy duotone; darker at the bottom where the type sits. */
+.grade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--blue);
+  mix-blend-mode: multiply;
+}
+.grade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--navy-deep) 6%, rgba(0, 7, 58, 0.55) 45%, rgba(0, 7, 58, 0.1));
+}
+.inner {
+  position: relative;
+  padding-top: calc(var(--header-h) + 48px);
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+.code {
+  color: var(--yellow);
+  margin: 0 0 12px;
+}
+.num {
+  position: absolute;
+  /* physical: the element is LTR, the page is RTL */
+  left: calc(var(--gutter) - 0.04em);
+  bottom: -0.16em;
+  margin: 0;
+  font-size: clamp(160px, 28vw, 440px);
+  line-height: 0.8;
+  color: var(--yellow);
+  z-index: -1;
+  direction: ltr;
+  opacity: 0.95;
+}
+.title {
+  font-size: var(--fs-3xl);
+  margin: 0;
+}
+.lead {
+  margin: 20px 0 32px;
+  font-size: var(--fs-md);
+  color: var(--muted-dark);
+  max-width: 40ch;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px 40px;
+}
+.ways {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+}
+.ways a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+  font-weight: 700;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-1);
+}
+.ways a:hover {
+  border-color: var(--yellow);
+}
+.idx {
+  font-size: 13px;
+  color: var(--yellow);
+}
+@media (max-width: 900px) {
+  .page {
+    align-items: start;
+  }
+  .inner {
+    padding-top: calc(var(--header-h) + 50vw);
+  }
+  .num {
+    font-size: 50vw;
+    bottom: auto;
+    top: calc(var(--header-h) + 16px);
+    left: auto;
+    right: calc(var(--gutter) - 0.04em);
+    z-index: 0;
+  }
+}
+@media (min-width: 901px) {
+  /* keep the copy clear of the 404 on the other side */
+  .row,
+  .lead {
+    max-width: 58vw;
+  }
+}

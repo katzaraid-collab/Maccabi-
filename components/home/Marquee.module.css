@@ -1,28 +1,54 @@
 .marquee {
   overflow: hidden;
   background: var(--navy);
-  color: var(--yellow);
-  padding-block: 18px;
+  color: var(--white);
+  border-block: 1px solid rgba(255, 255, 255, 0.16);
+  padding-block: 14px 12px;
   direction: ltr;
 }
 .marquee[data-tone="yellow"] {
   background: var(--yellow);
   color: var(--navy);
+  border-color: var(--navy);
 }
 .track {
   display: flex;
   width: max-content;
-  animation: slide 38s linear infinite;
+  animation: slide 46s linear infinite;
 }
 .item {
   display: inline-flex;
   align-items: center;
-  gap: 28px;
-  padding-inline-end: 28px;
-  font-weight: 900;
-  font-size: clamp(22px, 3vw, 40px);
+  gap: 18px;
+  padding-inline-end: 36px;
   white-space: nowrap;
   direction: rtl;
+}
+.n {
+  font-size: 13px;
+  color: var(--yellow);
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.marquee[data-tone="yellow"] .n {
+  color: var(--navy);
+}
+.word {
+  font-size: clamp(26px, 3.2vw, 46px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+/* A hard diagonal cut instead of a star. */
+.slash {
+  width: 2px;
+  height: 1.4em;
+  background: var(--yellow);
+  transform: skewX(-18deg);
+  font-size: clamp(26px, 3.2vw, 46px);
+  margin-inline-start: 18px;
+}
+.marquee[data-tone="yellow"] .slash {
+  background: var(--navy);
 }
 @keyframes slide {
   to {
@@ -31,4 +57,9 @@
 }
 .marquee:hover .track {
   animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
 }

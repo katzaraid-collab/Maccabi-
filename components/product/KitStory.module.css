@@ -1,0 +1,204 @@
+.story {
+  position: relative;
+  display: grid;
+  background: var(--navy-deep);
+  color: var(--white);
+  overflow: hidden;
+}
+.hero {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+.img {
+  object-fit: cover;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--navy-deep) 0%, rgba(0, 7, 58, 0.25) 28%, transparent 50%);
+  pointer-events: none;
+}
+.cap {
+  position: absolute;
+  top: 18px;
+  inset-inline: var(--gutter);
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  padding-inline: var(--gutter);
+}
+.word {
+  margin: 0;
+  font-family: var(--font-latin-display), sans-serif;
+  font-size: clamp(120px, 21vw, 340px);
+  line-height: 0.78;
+  letter-spacing: -0.02em;
+  color: var(--yellow);
+  direction: ltr;
+  text-align: right;
+}
+.title {
+  margin: 0;
+  font-size: clamp(30px, 3.4vw, 54px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.second {
+  position: relative;
+  overflow: hidden;
+}
+.second img {
+  object-fit: cover;
+}
+
+/* Wide shot: the photo runs full bleed and the kit word climbs back up into it. */
+.story[data-shape="wide"] .hero {
+  aspect-ratio: 21 / 9;
+}
+.story[data-shape="wide"] .copy {
+  grid-template-columns: 1fr minmax(0, 0.9fr);
+  grid-template-areas: "word word" "title second";
+  column-gap: clamp(24px, 4vw, 64px);
+  row-gap: 28px;
+  margin-top: clamp(-200px, -11vw, -60px);
+}
+.story[data-shape="wide"] .word {
+  grid-area: word;
+}
+.story[data-shape="wide"] .title {
+  grid-area: title;
+  align-self: start;
+}
+.story[data-shape="wide"] .second {
+  grid-area: second;
+  aspect-ratio: 16 / 10;
+}
+.story[data-shape="wide"] .second[data-shape="tall"] {
+  aspect-ratio: 4 / 5;
+  max-width: 420px;
+  justify-self: end;
+  width: 100%;
+}
+
+/* Tall shot: portrait on the start side, type and details beside it. */
+.story[data-shape="tall"] {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-areas: "hero copy" "hero details";
+  grid-template-rows: auto 1fr;
+}
+.story[data-shape="tall"] .hero {
+  grid-area: hero;
+  aspect-ratio: 2 / 3;
+}
+.story[data-shape="tall"] .hero::after {
+  display: none;
+}
+.story[data-shape="tall"] .copy {
+  grid-area: copy;
+  padding-top: clamp(40px, 5vw, 80px);
+  gap: 24px;
+}
+.story[data-shape="tall"] .word {
+  margin-inline-end: calc(var(--gutter) * -1 - 0.06em);
+}
+.story[data-shape="tall"] .details {
+  grid-area: details;
+  align-self: end;
+}
+
+.details {
+  position: relative;
+  z-index: 1;
+  padding: clamp(36px, 5vw, 72px) var(--gutter) clamp(40px, 5vw, 72px);
+}
+.detailsHead {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-dark);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.65);
+}
+.tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 355px));
+  gap: 4px;
+}
+.tile {
+  position: relative;
+  aspect-ratio: 355 / 250;
+  overflow: hidden;
+}
+.tile img {
+  object-fit: cover;
+  transition: transform 0.8s var(--ease-out);
+}
+.tiles li:hover .tile img {
+  transform: scale(1.06);
+}
+.tileCap {
+  display: block;
+  padding-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.tileCap b {
+  font-family: var(--font-latin-display), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--yellow);
+  margin-inline-end: 6px;
+}
+
+@media (max-width: 900px) {
+  .cap span:last-child {
+    display: none;
+  }
+  .story[data-shape="wide"] .hero {
+    aspect-ratio: 4 / 5;
+  }
+  .story[data-shape="wide"] .copy {
+    grid-template-columns: 1fr;
+    grid-template-areas: "word" "title" "second";
+    margin-top: -64px;
+  }
+  .story[data-shape="tall"] {
+    grid-template-columns: 1fr;
+    grid-template-areas: "hero" "copy" "details";
+  }
+  .story[data-shape="tall"] .hero {
+    aspect-ratio: 4 / 5;
+  }
+  .story[data-shape="tall"] .copy {
+    padding-top: 0;
+    margin-top: -48px;
+  }
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile img {
+    transition: none;
+  }
+}

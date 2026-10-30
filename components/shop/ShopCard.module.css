@@ -1,0 +1,159 @@
+.card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  animation: enter 0.7s var(--ease-out) both;
+  animation-delay: calc(var(--s, 0) * 45ms);
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+.media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--white);
+  overflow: hidden;
+  isolation: isolate;
+}
+.img,
+.alt {
+  object-fit: contain;
+  padding: 7%;
+  transition:
+    opacity 0.45s var(--ease-out),
+    transform 0.9s var(--ease-out);
+}
+.alt {
+  opacity: 0;
+}
+@media (hover: hover) {
+  .card:hover .img {
+    transform: scale(1.05);
+  }
+  .card:hover .alt {
+    opacity: 1;
+  }
+  .card:hover .img:has(+ .alt) {
+    opacity: 0;
+  }
+}
+.card[data-soldout="true"] .img {
+  opacity: 0.55;
+  filter: grayscale(0.8);
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-latin-display);
+  font-size: 48px;
+  color: var(--line);
+}
+.flag {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  padding: 6px 10px;
+  background: var(--paper);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.sale {
+  background: var(--sale);
+  color: var(--white);
+  font-size: 15px;
+  padding: 4px 10px;
+}
+.print {
+  color: var(--blue);
+}
+.body {
+  display: grid;
+  gap: 3px;
+  padding-inline-end: 8px;
+}
+.label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+.card:hover .title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.price {
+  margin: 4px 0 0;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 15px;
+}
+.price strong {
+  font-weight: 800;
+}
+.price s {
+  color: var(--muted);
+  font-size: 14px;
+}
+.card[data-soldout="true"] .price {
+  color: var(--muted);
+}
+
+.skel {
+  display: grid;
+  gap: 14px;
+}
+.skel .media,
+.lines i {
+  background: linear-gradient(90deg, rgba(0, 14, 98, 0.05) 30%, rgba(0, 14, 98, 0.1) 50%, rgba(0, 14, 98, 0.05) 70%) 0 0 / 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.lines {
+  display: grid;
+  gap: 8px;
+}
+.lines i {
+  height: 12px;
+  width: 40%;
+}
+.lines i:nth-child(2) {
+  width: 85%;
+  height: 14px;
+}
+.lines i:nth-child(3) {
+  width: 25%;
+}
+@keyframes shimmer {
+  to {
+    background-position: -300% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .skel .media,
+  .lines i {
+    animation: none;
+  }
+}

@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Rail } from "@/components/home/Rail";
+import { Bundle } from "@/components/product/Bundle";
+import { KitStory } from "@/components/product/KitStory";
 import { ProductView } from "@/components/product/ProductView";
+import { RecentlyViewed } from "@/components/product/RecentlyViewed";
+import { kitBundle } from "@/lib/bundles";
 import { getProduct, related } from "@/lib/catalog";
 import { STORE_DOMAIN } from "@/lib/config";
 import s from "./page.module.css";
@@ -18,14 +23,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: product.title,
     description: product.description.slice(0, 160) || `${product.title} – החנות הרשמית של מכבי תל אביב`,
-    openGraph: { title: product.title, images: product.images.slice(0, 1).map((i) => i.src) },
+    openGraph: { title: product.title },
+    alternates: canonical(`/product/${product.handle}`),
   };
 }
 
 export default async function ProductPage({ params }: Props) {
   const product = await getProduct((await params).handle);
   if (!product) notFound();
-  const more = await related(product);
+  const [more, bundle] = await Promise.all([related(product), kitBundle(product)]);
+  // Bundle pieces already have their own module; keep the rail for everything else.
+  const inBundle = new Set(bundle.map((b) => b.product.handle));
+  const rail = more.filter((p) => !inBundle.has(p.handle));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -46,7 +55,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <div className={`wrap ${s.page}`}>
+      <div className={s.page}>
         <nav className={s.crumbs} aria-label="פירורי לחם">
           <Link href="/">בית</Link>
           <span aria-hidden="true">/</span>
@@ -58,7 +67,10 @@ export default async function ProductPage({ params }: Props) {
           <ProductView product={product} />
         </Suspense>
       </div>
-      {more.length > 0 && <Rail eyebrow="משלימים את הלוק" title="שילוב מנצח" href="/shop/new" products={more} />}
+      {product.kit && <KitStory kit={product.kit} />}
+      {product.kit && bundle.length > 0 && <Bundle items={bundle} kit={product.kit} current={product.handle} />}
+      {rail.length > 0 && <Rail eyebrow="N°03 · MORE" title="עוד מהמדף" href={product.kit ? "/shop/kits" : "/shop/new"} products={rail} />}
+      <RecentlyViewed current={{ handle: product.handle, title: product.title, price: product.price, image: product.images[0]?.src ?? null }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </>
   );

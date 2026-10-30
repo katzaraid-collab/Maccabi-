@@ -1,69 +1,148 @@
 .section {
-  padding-block: clamp(56px, 7vw, 100px);
+  padding-block: var(--space-9);
 }
 .head {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: 24px;
-  margin-bottom: 32px;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  position: relative;
 }
-.head h2 {
-  font-size: clamp(40px, 5vw, 72px);
-  margin-top: 14px;
+/* Rule sits on the content edge, like a printed grid line. */
+.head::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  inset-inline: var(--gutter);
+  height: 1px;
+  background: var(--navy);
+}
+.titles {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+.eyebrow {
+  color: var(--muted);
+}
+.title {
+  font-size: var(--fs-2xl);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.count {
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: var(--blue);
+  top: 0;
+  line-height: 1;
+  margin-top: 0.3em;
 }
 .controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.controls button {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 2px solid var(--navy);
-  background: transparent;
-  font-size: 20px;
-  font-weight: 900;
-  transition:
-    background 0.2s,
-    color 0.2s;
-}
-.controls button:hover {
-  background: var(--navy);
-  color: var(--white);
+  gap: 24px;
 }
 .all {
   font-weight: 800;
-  margin-inline-end: 12px;
-  text-decoration: underline;
-  text-underline-offset: 6px;
-  text-decoration-thickness: 2px;
-  text-decoration-color: var(--yellow);
+  font-size: 15px;
+  display: inline-flex;
+  gap: 8px;
+  padding-block: 6px;
+  border-bottom: 2px solid var(--navy);
+  transition: gap var(--dur-2) var(--ease-out);
+}
+.all:hover {
+  gap: 14px;
+}
+.arrows {
+  display: flex;
+}
+.arrows button {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--navy);
+  background: transparent;
+  border-radius: 0;
+  transition:
+    background var(--dur-1),
+    color var(--dur-1),
+    opacity var(--dur-1);
+}
+.arrows button + button {
+  border-inline-start: 0;
+}
+.arrows button:hover:not(:disabled) {
+  background: var(--navy);
+  color: var(--yellow);
+}
+.arrows button:disabled {
+  opacity: 0.25;
 }
 .track {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: clamp(220px, 23vw, 330px);
-  gap: 18px;
+  grid-auto-columns: clamp(232px, 23vw, 340px);
+  gap: 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding-inline: var(--gutter);
   scroll-padding-inline: var(--gutter);
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   scrollbar-width: none;
 }
 .track::-webkit-scrollbar {
   display: none;
 }
 .cell {
+  position: relative;
   scroll-snap-align: start;
+  min-width: 0;
+}
+.cellIdx {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  inset-inline-end: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  pointer-events: none;
+}
+/* Scroll-linked progress: thumb width = visible share, position = progress. */
+.progress {
+  --p: 0;
+  --v: 0.3;
+  position: relative;
+  display: block;
+  height: 2px;
+  margin-top: 28px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progress::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: calc(var(--v) * 100%);
+  background: var(--navy);
+  /* RTL: travel leftwards */
+  transform: translateX(calc(var(--p) * (1 / var(--v) - 1) * -100%));
 }
 @media (max-width: 700px) {
-  .controls button {
+  .head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .arrows {
     display: none;
   }
   .track {
-    grid-auto-columns: 62vw;
+    grid-auto-columns: 64vw;
+    gap: 12px;
   }
 }

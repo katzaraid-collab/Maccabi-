@@ -2,39 +2,44 @@
 
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
-import { price } from "@/lib/config";
-import { KIT_THEME } from "@/lib/kits";
+import { price, STORE_DOMAIN } from "@/lib/config";
 import type { Product } from "@/lib/types";
-import { Jersey } from "./Jersey";
+import { Gallery } from "./Gallery";
+import { KIT_EN, techLabel } from "./labels";
+import { nameError, NAME_MAX, numberError, PrintStudio } from "./PrintStudio";
+import { SizeGuide } from "./SizeGuide";
+import { isSingle, sizeSystem, sortedVariants } from "./sizes";
 import s from "./ProductView.module.css";
-
-const SIZE_ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "3XL", "4XL"];
-const sizeRank = (v: string) => {
-  const i = SIZE_ORDER.indexOf(v.toUpperCase());
-  if (i >= 0) return i;
-  const n = parseFloat(v);
-  return Number.isNaN(n) ? 999 : 100 + n;
-};
 
 export function ProductView({ product }: { product: Product }) {
   const { add } = useCart();
   const params = useSearchParams();
-  const variants = useMemo(() => [...product.variants].sort((a, b) => sizeRank(a.size) - sizeRank(b.size)), [product.variants]);
-  const single = variants.length === 1;
+  const variants = useMemo(() => sortedVariants(product), [product]);
+  const single = isSingle(product);
+  const system = sizeSystem(product);
+  const kit = product.kit;
+
   const [variantId, setVariantId] = useState<number | null>(single ? variants[0].id : null);
-  const [active, setActive] = useState(0);
+  const [qty, setQty] = useState(1);
   const [view, setView] = useState<"photo" | "print">("photo");
   const [wantPrint, setWantPrint] = useState(false);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
-  const [nudge, setNudge] = useState(false);
-  const [added, setAdded] = useState(false);
+  const [nudge, setNudge] = useState(0);
+  const [added, setAdded] = useState(0);
+  const [guide, setGuide] = useState(false);
+  const [barVisible, setBarVisible] = useState(false);
+
+  const sizesRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const addRef = useRef<HTMLButtonElement>(null);
 
   const variant = variants.find((v) => v.id === variantId) ?? null;
-  const shown = variant ?? variants.find((v) => v.price === product.price)!;
-  const kit = product.kit;
+  const shown = variant ?? variants.find((v) => v.price === product.price) ?? variants[0];
+  const off = shown.compareAt && shown.compareAt > shown.price ? Math.round((1 - shown.price / shown.compareAt) * 100) : 0;
+  const soldOutCount = variants.filter((v) => !v.available).length;
 
   // Arriving from the home print studio carries the name and number along.
   useEffect(() => {
@@ -43,196 +48,229 @@ export function ProductView({ product }: { product: Product }) {
     if (kit && (n || num || window.location.hash === "#print")) {
       setWantPrint(true);
       setView("print");
-      if (n) setName(n.slice(0, 12));
+      if (n) setName(n.slice(0, NAME_MAX));
       if (num) setNumber(num.replace(/\D/g, "").slice(0, 2));
     }
   }, [params, kit]);
 
+  // The mobile buy bar only shows while the real add button is off screen.
+  useEffect(() => {
+    const el = addRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setBarVisible(!e.isIntersecting), { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!added) return;
+    const t = setTimeout(() => setAdded(0), 2200);
+    return () => clearTimeout(t);
+  }, [added]);
+
+  const printInvalid = wantPrint && Boolean(nameError(name) || numberError(number));
+
   const onAdd = () => {
     if (!variant) {
-      setNudge(true);
-      setTimeout(() => setNudge(false), 600);
+      setNudge((n) => n + 1);
+      const el = sizesRef.current;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        if (r.top < 80 || r.bottom > window.innerHeight) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.querySelector<HTMLInputElement>("input:not(:disabled)")?.focus({ preventScroll: true });
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+          el.animate([{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "none" }], { duration: 380 });
+      }
       return;
     }
-    add({
-      variantId: variant.id,
-      handle: product.handle,
-      title: product.title,
-      size: variant.size,
-      price: variant.price,
-      image: product.images[0]?.src ?? null,
-      print: wantPrint && kit && (name || number) ? { name, number } : undefined,
-    });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    if (printInvalid) {
+      nameRef.current?.focus();
+      return;
+    }
+    add(
+      {
+        variantId: variant.id,
+        handle: product.handle,
+        title: product.title,
+        size: single ? "" : variant.size,
+        price: variant.price,
+        image: product.images[0]?.src ?? null,
+        print: wantPrint && kit && (name || number) ? { name: name.trim(), number } : undefined,
+      },
+      qty,
+    );
+    setAdded((n) => n + 1);
   };
 
-  const off = shown.compareAt && shown.compareAt > shown.price ? Math.round((1 - shown.price / shown.compareAt) * 100) : 0;
+  const togglePrint = (on: boolean) => {
+    setWantPrint(on);
+    setView(on ? "print" : "photo");
+  };
 
   return (
-    <div className={s.grid}>
-      <div className={s.gallery}>
-        <div className={s.stage} style={kit ? ({ "--bg": KIT_THEME[kit].bg } as React.CSSProperties) : undefined} data-view={view}>
-          {view === "print" && kit ? (
-            <Jersey kit={kit} name={name || "שם שלך"} number={number || "10"} className={s.jersey} />
-          ) : product.images[active] ? (
-            <Image
-              key={product.images[active].src}
-              src={product.images[active].src}
-              alt={product.title}
-              fill
-              sizes="(max-width: 900px) 100vw, 55vw"
-              priority
-              className={s.main}
-            />
-          ) : null}
-          {kit && (
-            <div className={s.viewToggle} role="tablist" aria-label="תצוגה">
-              <button role="tab" aria-selected={view === "photo"} onClick={() => setView("photo")}>
-                תמונה
-              </button>
-              <button role="tab" aria-selected={view === "print"} onClick={() => setView("print")}>
-                הגב שלך
-              </button>
-            </div>
-          )}
-        </div>
-        {product.images.length > 1 && (
-          <div className={s.thumbs}>
-            {product.images.map((img, i) => (
-              <button
-                key={img.src}
-                className={s.thumb}
-                aria-label={`תמונה ${i + 1}`}
-                aria-pressed={view === "photo" && i === active}
-                onClick={() => {
-                  setActive(i);
-                  setView("photo");
-                }}
-              >
-                <Image src={img.src} alt="" fill sizes="96px" />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+    <>
+      <div className={s.grid}>
+        <Gallery
+          images={product.images}
+          title={product.title}
+          kit={kit}
+          view={view}
+          onView={(v) => {
+            setView(v);
+            if (v === "print" && !wantPrint && product.available) setWantPrint(true);
+          }}
+          printName={wantPrint ? name : ""}
+          printNumber={wantPrint ? number : ""}
+        />
 
-      <div className={s.panel}>
-        <div className={s.sticky}>
-          {kit && <p className="eyebrow">חולצת {KIT_THEME[kit].label} · 26/27</p>}
-          <h1 className={s.title}>{product.title}</h1>
-          <div className={s.price}>
-            <strong>{price(shown.price)}</strong>
-            {off > 0 && (
-              <>
-                <s>{price(shown.compareAt!)}</s>
-                <span className={s.off}>-{off}%</span>
-              </>
+        <div className={s.panel}>
+          <div className={s.sticky}>
+            <p className={s.tech}>{techLabel(product)}</p>
+            {kit && (
+              <p className={s.kitWord} aria-hidden="true">
+                {KIT_EN[kit]}
+              </p>
             )}
-          </div>
+            <h1 className={s.title}>{product.title}</h1>
+            <div className={s.price}>
+              <strong>{price(shown.price)}</strong>
+              {off > 0 && (
+                <>
+                  <s aria-label={`במקום ${price(shown.compareAt!)}`}>{price(shown.compareAt!)}</s>
+                  <span className={s.off}>-{off}%</span>
+                </>
+              )}
+              {!product.available && <span className={s.soldTag}>אזל</span>}
+            </div>
 
-          {!single && (
-            <fieldset className={s.sizes} data-nudge={nudge}>
-              <legend>
-                מידה
-                {variant && <span> · {variant.size}</span>}
-              </legend>
-              <div className={s.sizeGrid}>
-                {variants.map((v) => (
-                  <label key={v.id} className={s.size} data-disabled={!v.available}>
-                    <input
-                      type="radio"
-                      name="size"
-                      value={v.id}
-                      disabled={!v.available}
-                      checked={variantId === v.id}
-                      onChange={() => setVariantId(v.id)}
-                    />
-                    <span>{v.size}</span>
-                  </label>
-                ))}
+            {!single && (
+              <div className={s.sizes} ref={sizesRef} data-nudge={nudge > 0 && !variant}>
+                <div className={s.sizeHead}>
+                  <span id="size-label">
+                    מידה{variant && <b> · {variant.size}</b>}
+                  </span>
+                  <button type="button" className={s.guideBtn} onClick={() => setGuide(true)} aria-haspopup="dialog">
+                    מדריך מידות
+                  </button>
+                </div>
+                <div className={s.sizeGrid} role="radiogroup" aria-labelledby="size-label" aria-describedby="size-msg">
+                  {variants.map((v) => (
+                    <label key={v.id} className={s.size} data-disabled={!v.available}>
+                      <input
+                        type="radio"
+                        name="size"
+                        value={v.id}
+                        disabled={!v.available}
+                        checked={variantId === v.id}
+                        onChange={() => setVariantId(v.id)}
+                        aria-label={v.available ? v.size : `${v.size}, אזל`}
+                      />
+                      <span dir="ltr">{v.size}</span>
+                    </label>
+                  ))}
+                </div>
+                <p id="size-msg" className={s.sizeMsg} data-alert={nudge > 0 && !variant} aria-live="polite">
+                  {nudge > 0 && !variant
+                    ? "בחר מידה כדי להמשיך"
+                    : !product.available
+                      ? "כל המידות אזלו"
+                      : soldOutCount > 0
+                        ? "מידה מסומנת בקו אזלה"
+                        : ""}
+                </p>
               </div>
-              {nudge && <p className={s.hint} role="alert">בחר מידה כדי להמשיך</p>}
-            </fieldset>
-          )}
+            )}
 
-          {kit && product.available && (
-            <div className={s.print} id="print">
-              <label className={s.printToggle}>
-                <input
-                  type="checkbox"
-                  checked={wantPrint}
-                  onChange={(e) => {
-                    setWantPrint(e.target.checked);
-                    setView(e.target.checked ? "print" : "photo");
-                  }}
-                />
-                <span className={s.switch} aria-hidden="true" />
-                <span>
-                  <strong>הדפסת שם ומספר</strong>
-                  <small>רואים את התוצאה בזמן אמת</small>
-                </span>
-              </label>
-              {wantPrint && (
-                <div className={s.printFields}>
-                  <label>
-                    <span>שם</span>
-                    <input value={name} onChange={(e) => setName(e.target.value.slice(0, 12))} onFocus={() => setView("print")} maxLength={12} placeholder="עד 12 תווים" />
-                  </label>
-                  <label>
-                    <span>מספר</span>
-                    <input
-                      value={number}
-                      onChange={(e) => setNumber(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                      onFocus={() => setView("print")}
-                      inputMode="numeric"
-                      maxLength={2}
-                      placeholder="0–99"
-                      dir="ltr"
-                    />
-                  </label>
+            {kit && product.available && (
+              <PrintStudio
+                ref={nameRef}
+                kit={kit}
+                on={wantPrint}
+                onToggle={togglePrint}
+                name={name}
+                number={number}
+                onName={setName}
+                onNumber={setNumber}
+                onFocusField={() => setView("print")}
+              />
+            )}
+
+            <div className={s.buyRow}>
+              {product.available && (
+                <div className={s.qty} role="group" aria-label="כמות">
+                  <button type="button" onClick={() => setQty((q) => Math.min(10, q + 1))} aria-label="הוספת יחידה" disabled={qty >= 10}>
+                    +
+                  </button>
+                  <output aria-live="polite" aria-label={`כמות ${qty}`}>
+                    {qty}
+                  </output>
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="הפחתת יחידה" disabled={qty <= 1}>
+                    −
+                  </button>
                 </div>
               )}
+              <button ref={addRef} type="button" className={s.add} onClick={onAdd} disabled={!product.available} data-added={added > 0}>
+                <span className={s.addLabel}>{!product.available ? "אזל מהמלאי" : "הוספה לסל"}</span>
+                <span className={s.addDone} aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
+                  </svg>
+                  נוסף לסל
+                </span>
+              </button>
             </div>
-          )}
-
-          <button className={`btn btn-block ${s.add}`} onClick={onAdd} disabled={!product.available} data-added={added}>
-            {!product.available ? "אזל מהמלאי" : added ? "נוסף לסל ✓" : "הוספה לסל"}
-          </button>
-
-          <ul className={s.perks}>
-            <li>תשלום מאובטח · Apple Pay · Google Pay</li>
-            <li>מוצר רשמי של מועדון הכדורגל מכבי תל אביב</li>
-          </ul>
-
-          {product.description && (
-            <details className={s.details} open>
-              <summary>על המוצר</summary>
-              <p>{product.description}</p>
-            </details>
-          )}
-          <details className={s.details}>
-            <summary>משלוחים והחזרות</summary>
-            <p>
-              כל הפרטים ב
-              <a href="https://shop.maccabi-tlv.co.il/policies/shipping-policy">מדיניות המשלוחים</a> וב
-              <a href="https://shop.maccabi-tlv.co.il/policies/refund-policy">מדיניות ההחזרות</a>.
+            <p className="sr-only" aria-live="polite">
+              {added > 0 ? `${product.title} נוסף לסל` : ""}
             </p>
-          </details>
+
+            <ul className={s.facts}>
+              <li>
+                <span>01</span>מוצר רשמי של מועדון הכדורגל מכבי תל אביב
+              </li>
+              <li>
+                <span>02</span>התשלום בקופה המאובטחת של החנות הרשמית
+              </li>
+            </ul>
+
+            <div className={s.details}>
+              {product.description && (
+                <details open>
+                  <summary>על המוצר</summary>
+                  <p>{product.description}</p>
+                </details>
+              )}
+              <details>
+                <summary>משלוחים והחזרות</summary>
+                <p>
+                  כל הפרטים ב<a href={`https://${STORE_DOMAIN}/policies/shipping-policy`}>מדיניות המשלוחים</a> וב
+                  <a href={`https://${STORE_DOMAIN}/policies/refund-policy`}>מדיניות ההחזרות</a> של החנות.
+                </p>
+              </details>
+            </div>
+          </div>
         </div>
       </div>
 
       {product.available && (
-        <div className={s.mobileBar}>
-          <div>
-            <strong>{price(shown.price)}</strong>
-            <small>{variant ? `מידה ${variant.size}` : single ? "" : "בחר מידה"}</small>
+        <div className={s.mobileBar} data-visible={barVisible} inert={!barVisible}>
+          {product.images[0] && (
+            <div className={s.barThumb}>
+              <Image src={product.images[0].src} alt="" fill sizes="48px" />
+            </div>
+          )}
+          <div className={s.barText}>
+            <strong>{price(shown.price * qty)}</strong>
+            <small data-alert={!variant && nudge > 0}>
+              {variant ? (single ? product.title : `מידה ${variant.size}${qty > 1 ? ` · ×${qty}` : ""}`) : "בחר מידה"}
+            </small>
           </div>
-          <button className="btn" onClick={onAdd}>
-            {added ? "נוסף ✓" : "הוספה לסל"}
+          <button type="button" className={s.barAdd} onClick={onAdd} data-added={added > 0}>
+            {added > 0 ? "נוסף ✓" : variant ? "הוספה לסל" : "בחר מידה"}
           </button>
         </div>
       )}
-    </div>
+
+      {guide && <SizeGuide system={system} onClose={() => setGuide(false)} />}
+    </>
   );
 }
