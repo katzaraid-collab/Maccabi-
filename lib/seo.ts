@@ -1,8 +1,11 @@
 // Shared SEO helpers: absolute URLs and schema.org JSON-LD builders.
-import { STORE_DOMAIN } from "./config";
+import { CLUB_SITE, STORE_DOMAIN } from "./config";
 
 /** Public origin of the storefront (no trailing slash). Override per deploy with NEXT_PUBLIC_SITE_URL. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? `https://${STORE_DOMAIN}`).replace(/\/$/, "");
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : `https://${STORE_DOMAIN}`)
+).replace(/\/$/, "");
 export const SITE_NAME = "מכבי תל אביב – החנות הרשמית";
 export const ORG_NAME = "מכבי תל אביב FC";
 
@@ -35,7 +38,7 @@ export function organizationJsonLd() {
     name: ORG_NAME,
     alternateName: "Maccabi Tel Aviv FC",
     sport: "Soccer",
-    url: "https://www.maccabi-tlv.co.il",
+    url: CLUB_SITE,
     logo: absoluteUrl("/icons/icon-512.png"),
   };
 }

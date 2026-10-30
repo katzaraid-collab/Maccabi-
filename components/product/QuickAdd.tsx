@@ -19,7 +19,7 @@ export function QuickAdd({ product }: { product: Product }) {
     return () => clearTimeout(t);
   }, [done]);
 
-  const put = (v: Variant) => {
+  const put = (v: Variant, from?: Element | null) => {
     add({
       variantId: v.id,
       handle: product.handle,
@@ -27,14 +27,14 @@ export function QuickAdd({ product }: { product: Product }) {
       size: single ? "" : v.size,
       price: v.price,
       image: product.images[0]?.src ?? null,
-    });
+    }, 1, { from, open: false });
     setDone(v.id);
   };
 
   return (
     <div className={s.quick} role="group" aria-label={`הוספה מהירה: ${product.title}`}>
       {single ? (
-        <button type="button" className={s.quickOne} onClick={() => put(variants[0])}>
+        <button type="button" className={s.quickOne} onClick={(e) => put(variants[0], e.currentTarget)}>
           {done ? "נוסף ✓" : "הוספה מהירה לסל"}
         </button>
       ) : (
@@ -47,7 +47,7 @@ export function QuickAdd({ product }: { product: Product }) {
                 type="button"
                 disabled={!v.available}
                 data-done={done === v.id}
-                onClick={() => put(v)}
+                onClick={(e) => put(v, e.currentTarget)}
                 aria-label={v.available ? `הוספה לסל במידה ${v.size}` : `מידה ${v.size} אזלה`}
                 dir="ltr"
               >

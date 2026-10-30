@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { Browser, BrowserSkeleton } from "@/components/shop/Browser";
 import { DEPARTMENTS, getDepartment, productsIn } from "@/lib/catalog";
 import { price } from "@/lib/config";
+import { canonical } from "@/lib/seo";
 import { DEPT_LATIN, DEPT_PHOTO, toItem, typeOf } from "@/components/shop/taxonomy";
 import type { Product } from "@/lib/types";
 import s from "./page.module.css";
@@ -13,8 +14,11 @@ import s from "./page.module.css";
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const dept = getDepartment((await params).slug);
-  return dept ? { title: dept.title, description: `${dept.title} – ${dept.kicker}. החנות הרשמית של מכבי תל אביב.` } : {};
+  const { slug } = await params;
+  const dept = getDepartment(slug);
+  return dept
+    ? { title: dept.title, description: `${dept.title} – ${dept.kicker}. החנות הרשמית של מכבי תל אביב.`, alternates: canonical(`/shop/${slug}`) }
+    : {};
 }
 
 // Hero strip: in-stock products with images, one per product type/kit first so

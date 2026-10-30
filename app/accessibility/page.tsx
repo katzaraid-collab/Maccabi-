@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 import s from "./page.module.css";
 
-export const metadata: Metadata = { title: "הצהרת נגישות" };
+export const metadata: Metadata = { title: "הצהרת נגישות", alternates: canonical("/accessibility") };
 
 const FEATURES = [
   "ניווט מלא במקלדת וקישור דילוג לתוכן",

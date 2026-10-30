@@ -74,7 +74,7 @@ export function Gallery({ images, title, kit, view, onView, printName, printNumb
   return (
     <div className={s.gallery} data-count={images.length}>
       <div className={s.track} ref={track} onScroll={onScroll}>
-        <div className={`${s.tile} ${s.hero}`}>
+        <div className={`${s.tile} ${s.hero}`} data-gallery-lead>
           {kit ? (
             <div className={s.flip} data-flipped={flipped} data-kit={kit}>
               <div className={s.face} inert={flipped}>

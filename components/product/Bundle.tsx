@@ -33,10 +33,15 @@ export function Bundle({ items, kit, current }: { items: Item[]; kit: Kit; curre
       document.getElementById(`bundle-size-${missing[0]?.product.id}`)?.focus();
       return;
     }
-    for (const i of chosen) {
+    chosen.forEach((i, n) => {
       const v = i.product.variants.find((x) => String(x.id) === sizes[i.product.handle])!;
-      add({ variantId: v.id, handle: i.product.handle, title: i.product.title, size: v.size, price: v.price, image: i.product.images[0]?.src ?? null });
-    }
+      const last = n === chosen.length - 1;
+      add(
+        { variantId: v.id, handle: i.product.handle, title: i.product.title, size: v.size, price: v.price, image: i.product.images[0]?.src ?? null },
+        1,
+        { open: last },
+      );
+    });
     setDone(true);
     setTried(false);
     setTimeout(() => setDone(false), 2200);

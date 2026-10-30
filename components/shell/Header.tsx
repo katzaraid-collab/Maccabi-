@@ -32,7 +32,18 @@ const NAV: { slug: string; label: string; hot?: boolean }[] = [
 // Server half of the header: builds the mega menu from the live catalog so
 // every column link points at a filter that actually returns products.
 export async function Header() {
-  const depts: MenuDept[] = await Promise.all(
+  const depts = await buildDepts().catch((err) => {
+    console.error("[header] menu data unavailable", err);
+    return NAV.map((n): MenuDept => {
+      const dept = DEPARTMENTS.find((d) => d.slug === n.slug)!;
+      return { slug: n.slug, href: `/shop/${n.slug}`, label: n.label, title: dept.title, latin: DEPT_LATIN[n.slug] ?? "", kicker: dept.kicker, count: 0, hot: n.hot, cols: [], photo: DEPT_PHOTO[n.slug] ?? null, product: null };
+    });
+  });
+  return <HeaderBar depts={depts} />;
+}
+
+async function buildDepts(): Promise<MenuDept[]> {
+  return Promise.all(
     NAV.map(async (n) => {
       const dept = DEPARTMENTS.find((d) => d.slug === n.slug)!;
       const list = await productsIn(n.slug);
@@ -72,6 +83,4 @@ export async function Header() {
       };
     }),
   );
-
-  return <HeaderBar depts={depts} />;
 }

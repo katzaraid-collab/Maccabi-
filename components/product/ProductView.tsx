@@ -98,6 +98,7 @@ export function ProductView({ product }: { product: Product }) {
         print: wantPrint && kit && (name || number) ? { name: name.trim(), number } : undefined,
       },
       qty,
+      { from: document.querySelector("[data-gallery-lead]") ?? addRef.current },
     );
     setAdded((n) => n + 1);
   };

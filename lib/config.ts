@@ -1,5 +1,9 @@
 // Shared between server and client.
 export const STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ?? "shop.maccabi-tlv.co.il";
+// The seven department slugs (see DEPARTMENTS in lib/catalog.ts). Middleware needs them
+// without pulling in the catalog.
+export const DEPARTMENT_SLUGS = ["new", "kits", "training", "fashion", "kids", "accessories", "sale"] as const;
+
 export const CLUB_SITE = "https://www.maccabi-tlv.co.il";
 
 export function checkoutUrl(lines: { variantId: number; qty: number }[]) {

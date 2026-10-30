@@ -8,7 +8,7 @@ import { Header } from "@/components/shell/Header";
 import { RevealObserver } from "@/components/shell/RevealObserver";
 import { TransitionRouter } from "@/components/shell/TransitionRouter";
 import { SiteJsonLd } from "@/components/seo/SiteJsonLd";
-import { INDEXABLE } from "@/lib/seo";
+import { INDEXABLE, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 const body = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-body", display: "swap" });
@@ -29,11 +29,10 @@ const displayHe = localFont({
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["500"], variable: "--font-mono-face", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://shop.maccabi-tlv.co.il"),
+  metadataBase: new URL(SITE_URL),
   title: { default: "מכבי תל אביב – החנות הרשמית", template: "%s · מכבי תל אביב" },
   description: "תלבושות המשחק של עונת 26/27, הדפסת שם ומספר, קולקציית 120 שנה, אופנה, ילדים ואביזרים – החנות הרשמית של מועדון הכדורגל מכבי תל אביב.",
   openGraph: { type: "website", locale: "he_IL", siteName: "מכבי תל אביב – החנות הרשמית" },
-  alternates: { canonical: "/" },
   robots: INDEXABLE ? undefined : { index: false, follow: false },
   icons: {
     icon: [

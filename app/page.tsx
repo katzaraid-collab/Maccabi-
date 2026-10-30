@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { Bento, type Tile } from "@/components/home/Bento";
 import { Marquee } from "@/components/home/Marquee";
@@ -6,10 +7,12 @@ import { Rail } from "@/components/home/Rail";
 import { ScrollFilm, type FilmKit } from "@/components/home/ScrollFilm";
 import { Story120 } from "@/components/home/Story120";
 import { DEPARTMENTS, byShelfOrder, currentKits, getCatalog } from "@/lib/catalog";
+import { canonical } from "@/lib/seo";
 import type { Kit } from "@/lib/types";
 import s from "./page.module.css";
 
 export const revalidate = 900;
+export const metadata: Metadata = { alternates: canonical("/") };
 
 export default async function Home() {
   const [catalog, kits] = await Promise.all([getCatalog(), currentKits()]);
@@ -40,11 +43,11 @@ export default async function Home() {
 
   return (
     <>
-      <ScrollFilm kits={filmKits} />
+      {filmKits.length > 0 && <ScrollFilm kits={filmKits} />}
       <div id="drop" tabIndex={-1} />
       <Marquee items={["עונת 26/27", "PUMA × מכבי תל אביב", "120 שנה", "הדפסה אישית", "מאז 1906"]} />
       <Rail eyebrow="חדש בחנות" title="הקולקציה של 26/27" href="/shop/new" products={newSeason.slice(0, 14)} />
-      <PrintTeaser links={printLinks} />
+      {Object.keys(printLinks).length > 0 && <PrintTeaser links={printLinks} />}
       <Story120 products={anniversary} />
       <Bento tiles={tiles} />
       {sale.length > 0 && <Rail eyebrow="SALE" title="מחירי יציע" href="/shop/sale" products={sale.slice(0, 14)} />}

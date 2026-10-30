@@ -90,10 +90,27 @@ async function fetchLive(): Promise<RawProduct[] | null> {
   }
 }
 
+function normalizeAll(raw: RawProduct[]): Product[] {
+  const out: Product[] = [];
+  for (const p of raw) {
+    try {
+      const n = normalize(p);
+      if (n.handle && n.variants.length && Number.isFinite(n.price)) out.push(n);
+    } catch {
+      // A malformed product is skipped, not allowed to fail every page.
+    }
+  }
+  return out;
+}
+
 async function loadCatalog(): Promise<Product[]> {
   const live = await fetchLive();
-  const raw = live ?? (await import("@/data/catalog.snapshot.json")).default;
-  return raw.map(normalize);
+  const products = live ? normalizeAll(live) : [];
+  if (products.length) return products;
+  if (live) console.error("[catalog] live feed had no usable products; serving the snapshot");
+  else console.error("[catalog] live feed unreachable; serving the snapshot");
+  const snapshot = (await import("@/data/catalog.snapshot.json")).default as RawProduct[];
+  return normalizeAll(snapshot);
 }
 
 // Across requests: the normalized catalog (~0.5 MB) sits in the data cache for
@@ -129,14 +146,6 @@ export async function getProduct(handle: string) {
   return index.get(decoded) ?? null;
 }
 
-/**
- * Trim a product to what a grid card reads before handing it to a client
- * component: no description, no variants, two images. Still typed as Product,
- * so `products={list.map(toCard)}` is a drop-in change for Rail and Browser.
- */
-export function toCard(p: Product): Product {
-  return { ...p, description: "", variants: [], images: p.images.slice(0, 2) };
-}
 
 // Curated departments. The live store has 100+ overlapping collections; these
 // map its tags onto the handful of doors a fan actually looks for.
@@ -179,10 +188,22 @@ export function byShelfOrder(list: Product[]) {
 export async function currentKits() {
   const catalog = await getCatalog();
   const order: Kit[] = ["home", "away", "third", "fourth"];
+  const shirt = (p: Product) => p.title.includes("חולצת") && p.images.length > 0;
+  // Strictest first (this season's men's shirt), then looser, so a renamed or
+  // sold-out product degrades the hero instead of breaking it.
+  const tiers: ((p: Product) => boolean)[] = [
+    (p) => shirt(p) && /26[./]27/.test(p.title) && p.title.includes("גבר"),
+    (p) => shirt(p) && /26[./]27/.test(p.title),
+    (p) => shirt(p),
+  ];
   return order
-    .map((kit) =>
-      catalog.find((p) => p.kit === kit && /26[./]27/.test(p.title) && p.title.includes("גבר") && p.title.includes("חולצת")),
-    )
+    .map((kit) => {
+      for (const test of tiers) {
+        const hit = catalog.find((p) => p.kit === kit && test(p));
+        if (hit) return hit;
+      }
+      return undefined;
+    })
     .filter((p): p is Product => Boolean(p));
 }
 

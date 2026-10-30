@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OG_SIZE } from "@/lib/og";
 import { canonical } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,7 +24,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: product.title,
     description: product.description.slice(0, 160) || `${product.title} – החנות הרשמית של מכבי תל אביב`,
-    openGraph: { title: product.title },
+    openGraph: {
+      title: product.title,
+      images: [{ url: `/og/product/${encodeURIComponent(product.handle)}`, width: OG_SIZE.width, height: OG_SIZE.height, alt: product.title }],
+    },
     alternates: canonical(`/product/${product.handle}`),
   };
 }
