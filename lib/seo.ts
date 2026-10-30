@@ -75,3 +75,6 @@ export function breadcrumbJsonLd(trail: { name: string; path: string }[]) {
 export function jsonLdString(data: unknown) {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
+
+// Only the real production deploy opts into indexing (NEXT_PUBLIC_ALLOW_INDEX=1).
+export const INDEXABLE = process.env.NEXT_PUBLIC_ALLOW_INDEX === "1";

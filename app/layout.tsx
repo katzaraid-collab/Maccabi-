@@ -7,6 +7,7 @@ import { Header } from "@/components/shell/Header";
 import { RevealObserver } from "@/components/shell/RevealObserver";
 import { TransitionRouter } from "@/components/shell/TransitionRouter";
 import { SiteJsonLd } from "@/components/seo/SiteJsonLd";
+import { INDEXABLE } from "@/lib/seo";
 import "./globals.css";
 
 const body = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-body", display: "swap" });
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
   description: "תלבושות המשחק של עונת 26/27, הדפסת שם ומספר, קולקציית 120 שנה, אופנה, ילדים ואביזרים – החנות הרשמית של מועדון הכדורגל מכבי תל אביב.",
   openGraph: { type: "website", locale: "he_IL", siteName: "מכבי תל אביב – החנות הרשמית" },
   alternates: { canonical: "/" },
+  robots: INDEXABLE ? undefined : { index: false, follow: false },
   icons: {
     icon: [
       { url: "/icons/icon-192.png", sizes: "192x192" },
